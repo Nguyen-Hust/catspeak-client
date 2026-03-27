@@ -1,0 +1,47 @@
+export const TOPICS = [
+  "Other",
+  "History",
+  "Science",
+  "Philosophy",
+  "Psychology",
+  "Politics",
+  "Space",
+  "Movies",
+  "Music",
+  "Art",
+  "Fashion",
+  "Culture",
+  "Books",
+  "Travel",
+  "Food",
+  "Nature",
+  "Relationships",
+  "Sports",
+  "Finance",
+  "Startups",
+  "Productivity",
+]
+
+export const LEVELS = {
+  English: [
+    { label: "A1", value: "A1" },
+    { label: "A2", value: "A2" },
+    { label: "B1", value: "B1" },
+    { label: "B2", value: "B2" },
+    { label: "C1", value: "C1" },
+    { label: "C2", value: "C2" },
+  ],
+  Chinese: [
+    { label: "HSK 1", value: "HSK1" },
+    { label: "HSK 2", value: "HSK2" },
+    { label: "HSK 3", value: "HSK3" },
+    { label: "HSK 4", value: "HSK4" },
+    { label: "HSK 5", value: "HSK5" },
+    { label: "HSK 6", value: "HSK6" },
+  ],
+  Vietnamese: [
+    { label: "Beginner", value: "Beginner" },
+    { label: "Intermediate", value: "Intermediate" },
+    { label: "Advanced", value: "Advanced" },
+  ],
+}

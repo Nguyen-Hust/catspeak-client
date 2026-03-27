@@ -1,0 +1,16 @@
+export default {
+  title: "MESSAGES",
+  loading: "Loading...",
+  error: "Error loading data",
+  noMessages: "No messages yet",
+  search: "Search",
+  placeholder: "Aa",
+  unknownUser: "Unknown User",
+  unknown: "?",
+  send: "Send",
+  add: "Add",
+  attach: "Attach",
+  image: "Image",
+  close: "Close",
+  conversationNotFound: "Conversation not found",
+}

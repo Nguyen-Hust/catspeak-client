@@ -1,0 +1,20 @@
+import React from "react"
+import ProfileDropdown from "@/features/user/components/ProfileDropdown"
+import { useAuth } from "@/features/auth"
+import { MessageWidget } from "@/features/messages"
+import { NotificationWidget } from "@/features/notifications"
+
+const HeaderUserControls = () => {
+  const { isAuthenticated } = useAuth()
+  return (
+    <div className="flex items-center gap-1">
+      {isAuthenticated && <MessageWidget />}
+
+      <NotificationWidget />
+
+      <ProfileDropdown />
+    </div>
+  )
+}
+
+export default HeaderUserControls

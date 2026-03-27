@@ -1,0 +1,5 @@
+export { default as HeroSection } from "./components/HeroSection"
+export { default as AISection } from "./components/AISection"
+export { default as FAQSection } from "./components/FAQSection"
+export { default as LanguageBar } from "./components/LanguageBar"
+export { default as ValuesSection } from "./components/ValuesSection"

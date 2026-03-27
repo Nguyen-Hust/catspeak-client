@@ -1,0 +1,16 @@
+export default {
+  title: "TIN NHẮN",
+  loading: "Đang tải...",
+  error: "Lỗi tải dữ liệu",
+  noMessages: "Chưa có tin nhắn",
+  search: "Tìm kiếm",
+  placeholder: "Aa",
+  unknownUser: "Người dùng không xác định",
+  unknown: "?",
+  send: "Gửi",
+  add: "Thêm",
+  attach: "Đính kèm",
+  image: "Ảnh",
+  close: "Đóng",
+  conversationNotFound: "Không tìm thấy cuộc trò chuyện",
+}

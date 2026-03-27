@@ -1,0 +1,241 @@
+/* Custom styles cho CathSpeak Client */
+/* Sử dụng Tailwind CSS cho styling chính */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+/* Ant Design overrides nếu cần */
+.ant-layout {
+  min-height: 100vh;
+}
+
+/* Fade in animation for smooth transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Custom scrollbar styling với tailwind-scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+/* Liquid Glass Effect */
+@keyframes liquid-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes liquid-glow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.liquid-glass {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 200%;
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: liquid-shimmer 3s infinite;
+  transition: left 0.5s;
+}
+
+.liquid-glass:hover {
+  background-position: 100% center;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.liquid-glass:hover::before {
+  left: 100%;
+  animation-duration: 1.5s;
+}
+
+.liquid-glass:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Liquid Glass Yellow Variant */
+.liquid-glass-yellow {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(244, 171, 27, 0.7) 0%,
+    rgba(244, 171, 27, 0.6) 50%,
+    rgba(244, 171, 27, 0.7) 100%
+  );
+  background-size: 200% 200%;
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(244, 171, 27, 0.6);
+  box-shadow:
+    0 8px 32px rgba(244, 171, 27, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-yellow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: liquid-shimmer 3s infinite;
+  transition: left 0.5s;
+}
+
+.liquid-glass-yellow:hover {
+  background-position: 100% center;
+  border-color: rgba(244, 171, 27, 0.8);
+  box-shadow:
+    0 12px 40px rgba(244, 171, 27, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(244, 171, 27, 0.3);
+  transform: translateY(-2px);
+}
+
+.liquid-glass-yellow:hover::before {
+  left: 100%;
+  animation-duration: 1.5s;
+}
+
+.liquid-glass-yellow:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 20px rgba(244, 171, 27, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Liquid Glass Gradient Variant (đỏ/cam/vàng) */
+.liquid-glass-gradient {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(163, 31, 0, 0.4) 0%,
+    rgba(239, 125, 34, 0.4) 50%,
+    rgba(246, 164, 15, 0.4) 100%
+  );
+  background-size: 200% 200%;
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(239, 125, 34, 0.3);
+  box-shadow:
+    0 8px 32px rgba(160, 47, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-gradient::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: liquid-shimmer 3s infinite;
+  transition: left 0.5s;
+}
+
+.liquid-glass-gradient:hover {
+  background-position: 100% center;
+  border-color: rgba(239, 125, 34, 0.5);
+  box-shadow:
+    0 12px 40px rgba(160, 47, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(239, 125, 34, 0.2);
+  transform: translateY(-2px);
+}
+
+.liquid-glass-gradient:hover::before {
+  left: 100%;
+  animation-duration: 1.5s;
+}
+
+.liquid-glass-gradient:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 20px rgba(160, 47, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}

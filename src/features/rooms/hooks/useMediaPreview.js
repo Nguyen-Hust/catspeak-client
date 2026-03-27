@@ -1,0 +1,141 @@
+import { useState, useEffect, useRef } from "react"
+import { toast } from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
+
+export const useMediaPreview = () => {
+  const { t } = useLanguage()
+  const [micOn, setMicOn] = useState(false)
+  const [cameraOn, setCameraOn] = useState(false)
+  const [localStream, setLocalStream] = useState(null)
+
+  const streamRef = useRef(null)
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
+
+  // Helper to request media
+  const getMediaStream = async ({ audio, video, device }) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio, video })
+
+      // When another app (e.g. Google Meet) holds exclusive mic access,
+      // getUserMedia succeeds but the audio track's `muted` property is true
+      // — meaning no audio data is flowing from the hardware.
+      if (audio && device === "mic") {
+        const audioTrack = stream.getAudioTracks()[0]
+        if (audioTrack?.muted) {
+          const unmuted = await new Promise((resolve) => {
+            const onUnmute = () => resolve(true)
+            audioTrack.addEventListener("unmute", onUnmute, { once: true })
+            setTimeout(() => {
+              audioTrack.removeEventListener("unmute", onUnmute)
+              resolve(false)
+            }, 2000)
+          })
+          if (!unmuted) {
+            console.warn(
+              "[useMediaPreview] 🔇 Mic track is muted — another app likely holds exclusive access",
+            )
+            stream.getTracks().forEach((t) => t.stop())
+            toast.error(
+              t.rooms?.waitingScreen?.micInUse ??
+                "Microphone is in use by another app.",
+            )
+            return null
+          }
+        }
+      }
+
+      streamRef.current = stream
+      setLocalStream(stream)
+      return stream
+    } catch (err) {
+      handleMediaError(err, device === "mic" ? "mic" : "camera", t)
+      return null
+    }
+  }
+
+  // Toggle mic
+  const toggleMic = async () => {
+    let audioTracks = streamRef.current?.getAudioTracks() || []
+
+    if (audioTracks.length === 0) {
+      const stream = await getMediaStream({
+        audio: true,
+        video: false,
+        device: "mic",
+      })
+      audioTracks = stream?.getAudioTracks() || []
+    }
+
+    if (audioTracks.length === 0) return false
+
+    setMicOn((prev) => {
+      const next = !prev
+
+      if (next) {
+        audioTracks.forEach((t) => (t.enabled = true))
+      } else {
+        // Stop mic tracks completely if turning off
+        audioTracks.forEach((t) => t.stop())
+        // Remove stopped tracks from streamRef
+        streamRef.current = new MediaStream(
+          streamRef.current.getVideoTracks(), // keep only video
+        )
+        setLocalStream(streamRef.current)
+      }
+
+      return next
+    })
+
+    return true
+  }
+
+  // Toggle camera
+  const toggleCamera = async () => {
+    let videoTracks = streamRef.current?.getVideoTracks() || []
+
+    if (videoTracks.length === 0) {
+      const stream = await getMediaStream({
+        audio: false,
+        video: true,
+        device: "camera",
+      })
+      videoTracks = stream?.getVideoTracks() || []
+    }
+
+    if (videoTracks.length === 0) return false
+
+    setCameraOn((prev) => {
+      const next = !prev
+
+      if (next) {
+        videoTracks.forEach((t) => (t.enabled = true))
+      } else {
+        videoTracks.forEach((t) => t.stop())
+        // Remove stopped tracks from streamRef
+        streamRef.current = new MediaStream(
+          streamRef.current.getAudioTracks(), // keep only mic
+        )
+        setLocalStream(streamRef.current)
+      }
+
+      return next
+    })
+
+    return true
+  }
+
+  return {
+    micOn,
+    cameraOn,
+    localStream,
+    toggleMic,
+    toggleCamera,
+  }
+}

@@ -1,0 +1,16 @@
+export default {
+  title: "消息",
+  loading: "加载中...",
+  error: "加载数据错误",
+  noMessages: "暂无消息",
+  search: "搜索",
+  placeholder: "Aa",
+  unknownUser: "未知用户",
+  unknown: "?",
+  send: "发送",
+  add: "添加",
+  attach: "附件",
+  image: "图片",
+  close: "关闭",
+  conversationNotFound: "未找到对话",
+}
