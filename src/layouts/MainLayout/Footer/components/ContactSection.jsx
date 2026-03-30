@@ -1,8 +1,7 @@
 import React, { useState } from "react"
-import Send from "@mui/icons-material/Send"
+import { Send } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-import { Typography, TextField } from "@mui/material"
-import { colors } from "@/shared/utils/colors"
+import TextInput from "@/shared/components/ui/inputs/TextInput.jsx"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 
 const ContactSection = () => {
@@ -12,112 +11,30 @@ const ContactSection = () => {
 
   return (
     <div className="flex-1 w-full flex flex-col items-center lg:items-end">
-      <Typography
-        variant="subtitle1"
-        className="font-bold uppercase text-center tracking-wide w-full max-w-md"
-        sx={{ marginBottom: 2 }}
-      >
+      <h2 className="font-bold uppercase text-center tracking-wide w-full max-w-md mb-4 text-base">
         {footerText.contactUs}
-      </Typography>
+      </h2>
 
       <div className="w-full max-w-md">
         <form className="flex flex-col gap-5">
           <div className="flex flex-col gap-4 sm:flex-row">
-            <TextField
+            <TextInput
               type="email"
               placeholder={footerText.emailPlaceholder}
-              variant="outlined"
-              fullWidth
-              inputProps={{
-                style: {
-                  fontSize: "16px", // Prevents iOS zoom on focus
-                },
-              }}
-              className="flex-1"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: 48,
-                  borderRadius: "9999px",
-                  backgroundColor: "white",
-                  "& fieldset": {
-                    borderColor: colors.border,
-                  },
-                  "&:hover fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                },
-                "& .MuiOutlinedInput-input": {
-                  padding: { xs: "12px 20px", sm: "10px 20px" },
-                  fontSize: "16px",
-                },
-              }}
+              containerClassName="flex-1"
+              className="!text-[16px]"
             />
-            <TextField
+            <TextInput
               placeholder={footerText.namePlaceholder}
-              variant="outlined"
-              fullWidth
-              inputProps={{
-                style: {
-                  fontSize: "16px", // Prevents iOS zoom on focus
-                },
-              }}
-              className="flex-1"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: 48,
-                  borderRadius: "9999px",
-                  backgroundColor: "white",
-                  "& fieldset": {
-                    borderColor: colors.border,
-                  },
-                  "&:hover fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                },
-                "& .MuiOutlinedInput-input": {
-                  padding: { xs: "12px 20px", sm: "10px 20px" },
-                  fontSize: "16px",
-                },
-              }}
+              containerClassName="flex-1"
+              className="!text-[16px]"
             />
           </div>
           <div className="flex items-center gap-3">
-            <TextField
+            <TextInput
               placeholder={footerText.contactPlaceholder}
-              variant="outlined"
-              fullWidth
-              inputProps={{
-                style: {
-                  fontSize: "16px", // Prevents iOS zoom on focus
-                },
-              }}
-              className="flex-1"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: 48,
-                  borderRadius: "9999px",
-                  backgroundColor: "white",
-                  "& fieldset": {
-                    borderColor: colors.border,
-                  },
-                  "&:hover fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.red[700],
-                  },
-                },
-                "& .MuiOutlinedInput-input": {
-                  padding: { xs: "12px 20px", sm: "10px 20px" },
-                  fontSize: "16px",
-                },
-              }}
+              containerClassName="flex-1"
+              className="!text-[16px]"
             />
             <button
               type="button"
@@ -125,7 +42,7 @@ const ContactSection = () => {
               aria-label={footerText.sendContact}
               onClick={() => setShowDevModal(true)}
             >
-              <Send sx={{ fontSize: 20 }} />
+              <Send className="h-5 w-5" />
             </button>
           </div>
           <InDevelopmentModal
@@ -136,17 +53,12 @@ const ContactSection = () => {
 
         <div className="mt-4 flex items-center text-sm text-white/90">
           <div className="flex-1 text-center sm:text-left italic text-white/90">
-            <Typography
-              variant="body2"
-              component="span"
-              className="font-bold text-base"
-            >
+            <span className="font-bold text-base">
               Cat Speak{" "}
-            </Typography>
-
-            <Typography variant="body2" component="span" className="text-sm">
+            </span>
+            <span className="text-sm">
               {footerText.contactMessage}
-            </Typography>
+            </span>
           </div>
         </div>
       </div>
