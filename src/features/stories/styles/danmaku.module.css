@@ -1,0 +1,21 @@
+@keyframes danmakuFly {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.item {
+  position: absolute;
+  max-width: 280px;
+  will-change: transform;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-name: danmakuFly;
+}
+
+.item:hover {
+  animation-play-state: paused !important;
+}

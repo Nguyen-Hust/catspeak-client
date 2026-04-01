@@ -1,83 +1,61 @@
 import React, { useState } from "react"
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControlLabel,
-  Checkbox,
-  Box,
-} from "@mui/material"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import Modal from "@/shared/components/ui/Modal"
 
-const PassConfirmationModal = ({ open, onResult }) => {
+const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
   const { t } = useLanguage()
-  const [reportReason, setReportReason] = useState(null)
+  const [confirmPass, setConfirmPass] = useState(false)
 
-  const handleConfirm = () => {
-    onResult(true) // Confirmed pass
-    setReportReason(null)
+  const handleClose = () => {
+    setConfirmPass(false)
+    onClose()
   }
 
-  const handleCancel = () => {
-    onResult(false) // Cancelled
-    setReportReason(null)
+  const handlePass = () => {
+    if (confirmPass) {
+      onPass(story)
+      handleClose()
+    } else {
+      setConfirmPass(true)
+    }
   }
 
-  const handleReasonToggle = () => {
-    setReportReason(
-      reportReason === "inappropriate_language"
-        ? null
-        : "inappropriate_language",
-    )
+  const handleConnect = () => {
+    onConnect(story)
+    handleClose()
   }
+
+  if (!story) return null
 
   return (
-    <Dialog
+    <Modal
       open={open}
-      onClose={handleCancel}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          padding: 2,
-        },
-      }}
+      onClose={handleClose}
+      title={t.catSpeak?.anonymous || "Anonymous"}
     >
-      <DialogTitle sx={{ pb: 1, fontWeight: "bold" }}>
-        {t.catSpeak.passConfirmationTitle}
-      </DialogTitle>
+      <div className="space-y-6">
+        <div className="min-h-[40px] w-full break-words rounded-lg bg-[#F2F2F2] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap">
+          {story.storyContent}
+        </div>
 
-      <DialogContent>
-        <Box sx={{ py: 2 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={reportReason === "inappropriate_language"}
-                onChange={handleReasonToggle}
-                sx={{
-                  color: "#990011",
-                  "&.Mui-checked": {
-                    color: "#990011",
-                  },
-                }}
-              />
-            }
-            label={t.catSpeak.inappropriateLanguage}
-          />
-        </Box>
-      </DialogContent>
-
-      <DialogActions sx={{ gap: 1 }}>
-        <PillButton onClick={handleCancel} variant="text" color="inherit">
-          {t.catSpeak.cancel}
-        </PillButton>
-        <PillButton onClick={handleConfirm}>{t.catSpeak.confirm}</PillButton>
-      </DialogActions>
-    </Dialog>
+        <div className="flex justify-end gap-3">
+          <PillButton
+            variant="secondary"
+            onClick={handlePass}
+            className="h-10"
+          >
+            {confirmPass
+              ? t.catSpeak?.confirm || "Confirm Pass"
+              : t.catSpeak?.pass || "Pass"}
+          </PillButton>
+          <PillButton onClick={handleConnect} className="h-10">
+            {t.catSpeak?.connect || "Connect"}
+          </PillButton>
+        </div>
+      </div>
+    </Modal>
   )
 }
 

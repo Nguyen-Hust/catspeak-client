@@ -53,7 +53,6 @@ const MessageWidget = () => {
     }
   }, [isOpen, dispatch])
 
-
   // Fetch conversations from API
   const {
     data: conversations = [],
@@ -228,10 +227,10 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-[#E5E5E5] ${isOpen ? "" : ""}`}
+        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label="Tin nhắn"
       >
-        <MessageCircle />
+        <MessageCircle size={20} />
       </button>
     </div>
   )

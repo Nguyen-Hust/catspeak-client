@@ -39,16 +39,17 @@ export const VideoCallProvider = ({ children }) => {
   const hasInitRef = useRef(false)
 
   // --- User data ---
-  const { data: userData } = useGetProfileQuery()
+  const { data: userData, isLoading: isLoadingUser } = useGetProfileQuery()
   const user = userData?.data ?? null
 
   // --- Room data (fetched by roomId from URL) ---
+  const isRoomQuerySkipped = !roomId || !user
   const {
     data: room,
     isLoading: isLoadingRoom,
     error: roomError,
   } = useGetRoomByIdQuery(roomId, {
-    skip: !roomId || !user,
+    skip: isRoomQuerySkipped,
     pollingInterval: phase === "waiting" ? 15000 : undefined,
   })
 
@@ -156,8 +157,8 @@ export const VideoCallProvider = ({ children }) => {
   //  RENDER: Guards & phase-based rendering
   // ========================================
 
-  // Loading room data
-  if (isLoadingRoom || isLoadingSessions) {
+  // Loading room data (also wait while user profile is loading or room query hasn't run yet)
+  if (isLoadingUser || isLoadingRoom || isLoadingSessions || isRoomQuerySkipped) {
     return (
       <div className="flex h-screen items-center justify-center bg-white text-gray-500">
         <LoadingSpinner text={t.rooms.waitingScreen.loading} />
@@ -165,8 +166,8 @@ export const VideoCallProvider = ({ children }) => {
     )
   }
 
-  // Room not found
-  if (roomError || (!isLoadingRoom && !room)) {
+  // Room not found (only after the room query has actually executed)
+  if (roomError || !room) {
     return <RoomNotFoundScreen />
   }
 
