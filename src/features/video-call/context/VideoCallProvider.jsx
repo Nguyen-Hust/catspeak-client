@@ -122,8 +122,7 @@ export const VideoCallProvider = ({ children }) => {
         participantName: user.username,
       }).unwrap()
 
-      console.log("[VideoCall] Raw token response:", JSON.stringify(tokenRes))
-      const token = tokenRes?.token ?? tokenRes?.data?.token
+      const token = tokenRes?.participant_token
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")
       }
