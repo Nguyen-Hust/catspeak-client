@@ -19,19 +19,21 @@ export const getUserLocale = () => {
  * @returns {string} Formatted date string
  */
 export const formatDate = (date, locale = getUserLocale()) => {
-  const dateObj = typeof date === "string" ? new Date(date) : date
+  const dateObj = date instanceof Date ? date : new Date(date)
+  if (isNaN(dateObj.getTime())) return ""
   return dateObj.toLocaleDateString(locale)
 }
 
 /**
  * Format a date to localized time string
- * @param {Date|string} date - Date object or ISO string
+ * @param {Date|string|number} date - Date object, ISO string, or timestamp (ms)
  * @param {string} locale - Optional locale override (defaults to user's browser locale)
  * @returns {string} Formatted time string (HH:MM)
  */
 export const formatTime = (date, locale = getUserLocale()) => {
-  if (!date) return ""
-  const dateObj = typeof date === "string" ? new Date(date) : date
+  if (!date && date !== 0) return ""
+  const dateObj = date instanceof Date ? date : new Date(date)
+  if (isNaN(dateObj.getTime())) return ""
   return dateObj.toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
@@ -41,12 +43,14 @@ export const formatTime = (date, locale = getUserLocale()) => {
 
 /**
  * Format a date to localized date and time string
- * @param {Date|string} date - Date object or ISO string
+ * @param {Date|string|number} date - Date object, ISO string, or timestamp (ms)
  * @param {string} locale - Optional locale override (defaults to user's browser locale)
  * @returns {string} Formatted date and time string
  */
 export const formatDateTime = (date, locale = getUserLocale()) => {
-  const dateObj = typeof date === "string" ? new Date(date) : date
+  if (!date && date !== 0) return ""
+  const dateObj = date instanceof Date ? date : new Date(date)
+  if (isNaN(dateObj.getTime())) return ""
   return dateObj.toLocaleString(locale, {
     year: "numeric",
     month: "2-digit",
@@ -58,8 +62,8 @@ export const formatDateTime = (date, locale = getUserLocale()) => {
 
 /**
  * Format a time range (start - end)
- * @param {Date|string} startDate - Start date object or ISO string
- * @param {Date|string} endDate - End date object or ISO string
+ * @param {Date|string|number} startDate - Start date object, ISO string, or timestamp
+ * @param {Date|string|number} endDate - End date object, ISO string, or timestamp
  * @param {string} locale - Optional locale override (defaults to user's browser locale)
  * @returns {string} Formatted time range string (HH:MM - HH:MM)
  */
@@ -68,19 +72,21 @@ export const formatTimeRange = (
   endDate,
   locale = getUserLocale(),
 ) => {
-  const start = typeof startDate === "string" ? new Date(startDate) : startDate
-  const end = typeof endDate === "string" ? new Date(endDate) : endDate
+  if (!startDate || !endDate) return ""
+  const start = startDate instanceof Date ? startDate : new Date(startDate)
+  const end = endDate instanceof Date ? endDate : new Date(endDate)
 
   return `${formatTime(start, locale)} - ${formatTime(end, locale)}`
 }
 
 /**
  * Calculate end date based on start date and duration in minutes
- * @param {Date|string} startDate - Start date object or ISO string
+ * @param {Date|string|number} startDate - Start date object, ISO string, or timestamp
  * @param {number} durationMinutes - Duration in minutes
  * @returns {Date} End date
  */
 export const calculateEndDate = (startDate, durationMinutes) => {
-  const start = typeof startDate === "string" ? new Date(startDate) : startDate
+  const start = startDate instanceof Date ? startDate : new Date(startDate)
+  if (isNaN(start.getTime())) return new Date()
   return new Date(start.getTime() + durationMinutes * 60000)
 }
