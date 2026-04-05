@@ -1,8 +1,8 @@
 import React from "react"
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import HeaderLogo from "@/shared/components/Header/HeaderLogo"
+import { MainLogo } from "@/shared/assets/icons/logo"
 
 import {
   VideoGrid,
@@ -19,7 +19,9 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTranslatedRoomName } from "@/features/rooms/utils/roomNameUtils"
 
 const VideoCallRoomContent = () => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const { lang } = useParams()
+  const navigate = useNavigate()
   const {
     // Layout state
     showChat,
@@ -36,6 +38,8 @@ const VideoCallRoomContent = () => {
     messages,
     handleSendMessage,
     isConnected,
+    // PiP controls
+    enterPiP,
   } = useVideoCallContext()
 
   const { formattedElapsed, formattedMax } = useSessionTimer(session)
@@ -72,15 +76,35 @@ const VideoCallRoomContent = () => {
     if (showChat) setUnreadMessages(0)
   }, [showChat])
 
+  // ── Logo click → enter PiP and navigate home ──
+  const handleLogoClick = (e) => {
+    e.preventDefault()
+    const homePath = `/${lang || language || "en"}/community`
+    enterPiP(homePath)
+  }
+
   if (!user) return <Navigate to="/" state={{ from: location }} replace />
 
   return (
     <div className="flex h-full w-full flex-col bg-primary2 text-textColor font-sans">
       {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-[#C6C6C6] bg-white px-3 py-2 shadow-sm md:px-6 md:py-4">
+      <div className="flex items-center justify-between border-b border-[#C6C6C6] bg-white px-5 py-3">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden w-40 shrink-0 items-center md:flex">
-            <HeaderLogo />
+            {/* Logo: clicking enters PiP mode instead of navigating away */}
+            <button
+              type="button"
+              onClick={handleLogoClick}
+              className="flex items-center gap-4 cursor-pointer bg-transparent border-none p-0"
+              aria-label="Minimize to Picture-in-Picture"
+              title="Continue browsing (call stays active)"
+            >
+              <img
+                src={MainLogo}
+                alt="Cat Speak logo"
+                className="h-10 w-auto"
+              />
+            </button>
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">

@@ -18,7 +18,7 @@ const EventDetailModal = ({ event, onClose }) => {
   if (!event) return null
 
   // Merge: prefer fully-loaded detail, fall back to the summary object
-  const ev = detail ?? event
+  const ev = detail ? { ...event, ...detail, currentParticipants: detail.currentParticipants ?? event.currentParticipants } : event
   const headerColor = ev.color || "#B91264"
 
   console.log(detail)

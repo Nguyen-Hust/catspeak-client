@@ -6,8 +6,6 @@ import StoryInputBar from "./StoryInputBar"
 import DanmakuStage from "./DanmakuStage"
 import PassConfirmationModal from "./PassConfirmationModal"
 import MyStoryModal from "./MyStoryModal"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
-
 
 const LiveMessages = ({ languageCommunity }) => {
   const {
@@ -75,9 +73,7 @@ const LiveMessages = ({ languageCommunity }) => {
       />
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center min-h-0">
-          <LoadingSpinner size="lg" />
-        </div>
+        <div className="flex-1 min-h-0"></div>
       ) : isEmpty ? (
         <div className="relative my-6 flex-1 w-full max-w-full overflow-hidden rounded-3xl bg-white/60 px-2 py-8 text-center">
           <div className="mt-4 text-[#7A7574] italic">

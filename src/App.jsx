@@ -7,18 +7,24 @@ import "@/styles/theme.css"
 
 import { ConversationSignalRProvider } from "@/features/messages/context/ConversationSignalRContext"
 import ServerDownScreen from "@/shared/components/ServerDownScreen"
+import NavigationProgress from "@/shared/components/NavigationProgress"
+import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
+import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 
 function App() {
   return (
     <Provider store={store}>
-      <ServerDownScreen />
-      <ConversationSignalRProvider>
-        <Toaster position="top-center" limit={1} />
-        <AppRouter />
-      </ConversationSignalRProvider>
+      <GlobalVideoCallProvider>
+        <NavigationProgress />
+        <ServerDownScreen />
+        <ConversationSignalRProvider>
+          <Toaster position="top-center" limit={1} />
+          <AppRouter />
+          <PiPWidget />
+        </ConversationSignalRProvider>
+      </GlobalVideoCallProvider>
     </Provider>
   )
 }
 
 export default App
-

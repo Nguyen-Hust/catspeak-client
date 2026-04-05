@@ -5,13 +5,9 @@ import EventDetailModal from "./EventDetailModal/index"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const VISIBLE_CHIP_COUNT = 3
-const MAX_TITLE_LENGTH = 13
-
-const truncateTitle = (title, defaultTitle) => {
+const getEventTitle = (title, defaultTitle) => {
   if (!title) return defaultTitle || "Sự kiện"
-  return title.length > MAX_TITLE_LENGTH
-    ? title.slice(0, MAX_TITLE_LENGTH) + "..."
-    : title
+  return title
 }
 
 const RegisteredEvents = () => {
@@ -60,8 +56,8 @@ const RegisteredEvents = () => {
                   backgroundColor: "rgba(255,255,255,0.35)",
                 }}
               />
-              <span className="text-sm font-[600] uppercase tracking-wide whitespace-nowrap">
-                {truncateTitle(event.title, t.calendar?.event || "Sự kiện")}
+              <span className="text-sm font-[600] uppercase tracking-wide truncate flex-1 min-w-0 text-left">
+                {getEventTitle(event.title, t.calendar?.event || "Sự kiện")}
               </span>
             </div>
           ))}

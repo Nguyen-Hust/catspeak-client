@@ -13,12 +13,12 @@ import { ArrowLeft } from "lucide-react"
  */
 const BackButton = ({ to, onClick, children, className = "" }) => {
   const base =
-    "flex items-center gap-2 h-10 px-3 rounded-lg w-fit text-gray-600 hover:text-gray-900 hover:bg-[#E5E5E5] transition-colors font-medium"
+    "group flex text-sm items-center gap-2 h-10 px-3 rounded-lg w-fit text-gray-600 hover:text-gray-900 hover:bg-[#E5E5E5] transition-colors font-medium"
 
   if (to) {
     return (
       <Link to={to} className={`${base} ${className}`}>
-        <ArrowLeft />
+        <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-[#990011]" />
         {children}
       </Link>
     )
@@ -26,7 +26,7 @@ const BackButton = ({ to, onClick, children, className = "" }) => {
 
   return (
     <button onClick={onClick} className={`${base} ${className}`}>
-      <ArrowLeft />
+      <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-[#990011]" />
       {children}
     </button>
   )

@@ -1,5 +1,7 @@
 import { AdminLayout, MainLayout, UserLayout, VideoCallLayout } from "@layouts"
 import { PageNotFound, ForbiddenPage } from "@/shared/pages"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
+import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 // Guest Pages
 import LandingPage from "@/features/landing/pages/LandingPage"
@@ -41,11 +43,26 @@ import { Navigate } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { AuthGuard } from "@/shared/components"
 
+/**
+ * Root layout that registers the router's navigate function
+ * for the GlobalVideoCallProvider (which lives above the router).
+ */
+const RootLayout = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  useRegisterNavigate(navigate, location)
+  return <Outlet />
+}
+
 const RootRoute = () => {
   return <LandingPage />
 }
 
 const routesConfig = [
+  {
+    // Root wrapper — registers navigate for global PiP provider
+    element: <RootLayout />,
+    children: [
   // Main layout routes (no language prefix)
   {
     path: "/",
@@ -287,6 +304,8 @@ const routesConfig = [
     path: "*",
     element: <PageNotFound />,
   },
+    ], // end RootLayout children
+  }, // end RootLayout wrapper
 ]
 
 export default routesConfig

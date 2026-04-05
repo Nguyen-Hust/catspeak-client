@@ -1,0 +1,126 @@
+import { useRef, useEffect } from "react"
+import { Track } from "livekit-client"
+import { useIsSpeaking } from "@livekit/components-react"
+import { MonitorUp } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+
+// ─── Dominant Speaker Video ─────────────────────────────────────────────────
+
+const DominantVideo = ({ participant }) => {
+  const videoRef = useRef(null)
+  const audioRef = useRef(null)
+  const isSpeaking = useIsSpeaking(participant)
+
+  const cameraPub = participant?.getTrackPublication?.(Track.Source.Camera)
+  const cameraTrack = cameraPub?.track
+  const webcamOn = participant?.isCameraEnabled
+  const isVideoVisible = webcamOn && !!cameraTrack
+
+  const micPub = participant?.getTrackPublication?.(Track.Source.Microphone)
+  const audioTrack = micPub?.track
+  const isLocal = participant?.isLocal
+  const displayName = participant?.name || participant?.identity || "?"
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el || !cameraTrack) return
+    cameraTrack.attach(el)
+    return () => cameraTrack.detach(el)
+  }, [cameraTrack])
+
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el || isLocal || !audioTrack) return
+    audioTrack.attach(el)
+    return () => audioTrack.detach(el)
+  }, [audioTrack, isLocal])
+
+  return (
+    <>
+      {isVideoVisible ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted={isLocal}
+          className="pip-video"
+        />
+      ) : (
+        <div className="pip-avatar-fallback">
+          <Avatar size={48} name={displayName} speaking={isSpeaking} />
+        </div>
+      )}
+      {!isLocal && (
+        <audio
+          ref={audioRef}
+          autoPlay
+          playsInline
+          style={{ display: "none" }}
+        />
+      )}
+      {isSpeaking && <div className="pip-speaking-ring" />}
+    </>
+  )
+}
+
+// ─── Screen Share Video ─────────────────────────────────────────────────────
+
+const ScreenShareVideo = ({ trackRef }) => {
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const el = videoRef.current
+    const track = trackRef?.publication?.track
+    if (!el || !track) return
+    track.attach(el)
+    return () => track.detach(el)
+  }, [trackRef?.publication?.track])
+
+  return (
+    <>
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="pip-video"
+        style={{ objectFit: "contain", background: "#111" }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          pointerEvents: "none",
+        }}
+      >
+        <MonitorUp size={14} className="text-yellow-400 drop-shadow" />
+      </div>
+    </>
+  )
+}
+
+// ─── Composite: picks what to show ──────────────────────────────────────────
+
+/**
+ * Renders the appropriate video content for the PiP widget.
+ *
+ * Priority: screen share → dominant speaker → avatar fallback
+ */
+const PiPVideoContent = ({ activeScreenShare, dominant }) => {
+  if (activeScreenShare) {
+    return <ScreenShareVideo trackRef={activeScreenShare} />
+  }
+
+  if (dominant) {
+    return <DominantVideo participant={dominant} />
+  }
+
+  return (
+    <div className="pip-avatar-fallback">
+      <Avatar size={48} name="?" />
+    </div>
+  )
+}
+
+export default PiPVideoContent

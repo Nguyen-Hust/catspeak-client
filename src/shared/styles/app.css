@@ -239,3 +239,27 @@ p {
     0 4px 20px rgba(160, 47, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
+
+/* ─── NProgress Top Loading Bar ──────────────────────────────────── */
+body #nprogress .bar {
+  background: linear-gradient(90deg, #990011, #cc3344, #990011);
+  position: fixed;
+  top: 0; /* Changed from 72px to be at absolute top of the screen */
+  z-index: 9999; /* Increased z-index to stay above the sticky header that has z-index 50 */
+  width: 100%;
+  height: 2px;
+  box-shadow:
+    0 0 8px rgba(153, 0, 17, 0.4),
+    0 0 4px rgba(153, 0, 17, 0.3);
+}
+
+body #nprogress .peg {
+  box-shadow:
+    0 0 10px rgba(153, 0, 17, 0.6),
+    0 0 5px rgba(153, 0, 17, 0.4);
+}
+
+/* Hide the default spinner */
+#nprogress .spinner {
+  display: none;
+}

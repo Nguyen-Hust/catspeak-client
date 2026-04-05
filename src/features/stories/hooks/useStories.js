@@ -18,7 +18,7 @@ const useStories = (languageCommunity) => {
   const { data: storiesData, isLoading: loadingStories } =
     useGetStoriesQuery(languageCommunity)
   const { data: myStoriesData, isLoading: loadingMyStories } =
-    useGetMyStoriesQuery()
+    useGetMyStoriesQuery(languageCommunity)
   const [createStory, { isLoading: isCreating }] = useCreateStoryMutation()
   const [interactWithStory] = useInteractWithStoryMutation()
   const [deleteStory] = useDeleteStoryMutation()

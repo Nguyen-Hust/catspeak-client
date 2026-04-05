@@ -61,7 +61,6 @@ body {
 /* Smooth scrolling and prevent layout shift */
 html {
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
 }
 
 /* Tailwind Scrollbar utilities */

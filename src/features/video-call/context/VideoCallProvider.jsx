@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react"
 import { useParams, useLocation, useNavigate } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
-import { LiveKitRoom } from "@livekit/components-react"
 import { useGetProfileQuery } from "@/features/auth"
 import {
   useGetVideoSessionByIdQuery,
@@ -14,33 +14,65 @@ import {
   useJoinVideoSession,
 } from "@/features/rooms"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { VideoCallContent } from "./VideoCallContext"
+import {
+  enterCall,
+  setPiP,
+} from "@/store/slices/videoCallSlice"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import SessionErrorScreen from "../components/SessionErrorScreen"
-import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
-
-const LIVEKIT_WS_URL = "wss://livekit.catspeak.com.vn"
 
 /**
  * Phases:
  *  - "waiting"  : Room loaded, showing WaitingScreen with media preview
  *  - "joining"  : User clicked "Join Now", creating/joining video session
- *  - "in-call"  : Session joined, LiveKit token acquired, LiveKitRoom rendered
+ *  - "in-call"  : Session joined, delegated to GlobalVideoCallProvider
  */
 export const VideoCallProvider = ({ children }) => {
-  const { id: roomId } = useParams()
+  const { id: roomId, lang } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const dispatch = useDispatch()
+  const { t, language } = useLanguage()
+
+  // Check if there's already an active global call for this room
+  const { isInCall, callInfo } = useSelector((s) => s.videoCall)
+  const isReturningToCall =
+    isInCall && callInfo?.roomId && String(callInfo.roomId) === String(roomId)
+
+  // If returning to an active call, exit PiP and render children directly.
+  // The global provider already has LiveKitRoom + context running.
+  useEffect(() => {
+    if (isReturningToCall) {
+      dispatch(setPiP(false))
+    }
+  }, [isReturningToCall, dispatch])
+
+  if (isReturningToCall) {
+    return <>{children}</>
+  }
+
+  // Otherwise, render the normal waiting → joining → in-call flow
+  return (
+    <VideoCallProviderInner roomId={roomId} lang={lang}>
+      {children}
+    </VideoCallProviderInner>
+  )
+}
+
+// ─── Inner provider (only rendered for new calls, not returns) ──────────
+const VideoCallProviderInner = ({ children, roomId, lang }) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { t, language } = useLanguage()
 
   // Detect if user arrived from queue match
   const fromQueue = location.state?.fromQueue === true
 
   // Phase state machine — skip waiting if from queue
-  const [phase, setPhase] = useState(fromQueue ? "joining" : "waiting") // "waiting" | "joining" | "in-call"
+  const [phase, setPhase] = useState(fromQueue ? "joining" : "waiting")
   const [joinedSessionId, setJoinedSessionId] = useState(null)
-  const [livekitToken, setLivekitToken] = useState(null)
   const [initMicOn, setInitMicOn] = useState(false)
   const [initCamOn, setInitCamOn] = useState(false)
 
@@ -114,7 +146,6 @@ export const VideoCallProvider = ({ children }) => {
   }, [localStream])
 
   // --- Handle "Join Now" click ---
-  // Flow: LiveKit token first → backend session only if token is valid
   const handleJoinClick = async ({ skipRoomFullCheck = false } = {}) => {
     setPhase("joining")
 
@@ -133,17 +164,42 @@ export const VideoCallProvider = ({ children }) => {
       }
 
       // 2. Token is valid → now create/join the backend session
-      const result = await hookJoin({ isRoomFull, micOn, cameraOn, skipRoomFullCheck })
+      const result = await hookJoin({
+        isRoomFull,
+        micOn,
+        cameraOn,
+        skipRoomFullCheck,
+      })
 
       if (result) {
         // Stop preview tracks before entering the call
         cleanupMediaPreview()
 
-        setLivekitToken(token)
         setInitMicOn(result.micOn)
         setInitCamOn(result.cameraOn)
         setJoinedSessionId(result.sessionId)
+
+        // Don't set phase to "in-call" yet — wait for session data to load
+        // Then we dispatch enterCall to the global provider
         setPhase("in-call")
+
+        // Build the call path for PiP return navigation
+        const callPath = `/${lang || language}/meet/${roomId}`
+
+        // Dispatch to global provider — this triggers LiveKitRoom rendering
+        dispatch(
+          enterCall({
+            livekitToken: token,
+            roomId,
+            sessionId: result.sessionId,
+            callPath,
+            roomData: room,
+            sessionData: null, // Will be updated once session query resolves
+            user,
+            initMicOn: result.micOn,
+            initCamOn: result.cameraOn,
+          }),
+        )
       } else {
         // Backend session join failed, go back to waiting
         setPhase("waiting")
@@ -157,6 +213,25 @@ export const VideoCallProvider = ({ children }) => {
       setPhase("waiting")
     }
   }
+
+  // --- Update global session data once it loads ---
+  useEffect(() => {
+    if (session && phase === "in-call") {
+      dispatch(
+        enterCall({
+          livekitToken: undefined, // Don't overwrite — keep existing
+          roomId,
+          sessionId: session.sessionId,
+          callPath: `/${lang || language}/meet/${roomId}`,
+          roomData: room,
+          sessionData: session,
+          user,
+          initMicOn,
+          initCamOn,
+        }),
+      )
+    }
+  }, [session, phase])
 
   // --- Auto-join for queue-matched users (skip WaitingScreen) ---
   const autoJoinTriggered = useRef(false)
@@ -188,11 +263,7 @@ export const VideoCallProvider = ({ children }) => {
     isLoadingSessions ||
     isRoomQuerySkipped
   ) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-white text-gray-500">
-        <LoadingSpinner text={t.rooms.waitingScreen.loading} />
-      </div>
-    )
+    return <div className="h-screen w-full bg-white"></div>
   }
 
   // Room not found
@@ -238,52 +309,7 @@ export const VideoCallProvider = ({ children }) => {
   }
 
   // ---- PHASE: IN-CALL ----
-  // Wait for session data
-  if (isLoadingSession || !session) {
-    return (
-      <VideoCallLoading
-        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
-      />
-    )
-  }
-
-  // Session error
-  if (sessionError) {
-    console.error("Failed to load session:", sessionError)
-    return <SessionErrorScreen error={sessionError} />
-  }
-
-  // Wait for LiveKit token
-  if (!livekitToken || !userData) {
-    return (
-      <VideoCallLoading
-        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
-      />
-    )
-  }
-
-  return (
-    <LiveKitRoom
-      serverUrl={LIVEKIT_WS_URL}
-      token={livekitToken}
-      connect={true}
-      audio={initMicOn}
-      video={initCamOn}
-      className="h-full w-full flex flex-col"
-      options={{
-        publishDefaults: {
-          simulcast: true,
-        },
-      }}
-    >
-      <VideoCallContent
-        user={user}
-        session={session}
-        sessionError={sessionError}
-        room={room}
-      >
-        {children}
-      </VideoCallContent>
-    </LiveKitRoom>
-  )
+  // The global provider is now rendering LiveKitRoom.
+  // Just render children — they get context from GlobalCallContent.
+  return <>{children}</>
 }

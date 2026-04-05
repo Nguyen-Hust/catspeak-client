@@ -31,7 +31,7 @@ export default {
   newsLoginPrompt:
     "Vui lòng đăng nhập để xem những bài viết mới nhất từ cộng đồng.",
   sidebar: {
-    news: "Bản tin của Cat Speak",
+    news: "Bản tin Cat Speak",
     discover: "Khám phá thế giới",
     video: "Video",
     mail: "Thư",

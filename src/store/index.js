@@ -4,6 +4,7 @@ import { baseApi } from "./api/baseApi"
 import authReducer from "./slices/authSlice"
 import messageWidgetReducer from "./slices/messageWidgetSlice"
 import serverStatusReducer from "./slices/serverStatusSlice"
+import videoCallReducer from "./slices/videoCallSlice"
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     auth: authReducer,
     messageWidget: messageWidgetReducer,
     serverStatus: serverStatusReducer,
+    videoCall: videoCallReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),
