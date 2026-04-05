@@ -49,10 +49,10 @@ export const videoSessionsApi = baseApi.injectEndpoints({
       ],
     }),
     getLivekitToken: builder.mutation({
-      query: ({ roomId, roomName, participantIdentity, participantName }) => ({
-        url: "/livekit/token",
+      query: ({ meetingId, name }) => ({
+        url: "/livekit/get-meeting-token",
         method: "POST",
-        body: { roomId, roomName, participantIdentity, participantName },
+        body: { meetingId, name },
       }),
     }),
   }),

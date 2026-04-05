@@ -4,10 +4,6 @@ import { LiveKitRoom } from "@livekit/components-react"
 
 import GlobalCallContent from "./GlobalCallContent"
 
-const LIVEKIT_WS_URL = "wss://livekit.catspeak.com.vn"
-
-// ─── Context + hook ─────────────────────────────────────────────────────────
-
 const GlobalVideoCallContext = createContext(null)
 
 export const useGlobalVideoCall = () => {
@@ -53,7 +49,7 @@ const IdleCallContent = ({ children }) => (
 // ─── Main Provider ──────────────────────────────────────────────────────────
 
 export const GlobalVideoCallProvider = ({ children }) => {
-  const { isInCall, livekitToken, callInfo } = useSelector(
+  const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(
     (s) => s.videoCall,
   )
 
@@ -63,7 +59,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
 
   return (
     <LiveKitRoom
-      serverUrl={LIVEKIT_WS_URL}
+      serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}
       audio={callInfo.initMicOn}

@@ -7,6 +7,8 @@ const initialState = {
   isPiP: false,
   /** LiveKit token for the active connection */
   livekitToken: null,
+  /** LiveKit WebSocket server URL */
+  livekitServerUrl: null,
   /** Static info about the active call */
   callInfo: {
     roomId: null,
@@ -31,6 +33,7 @@ const videoCallSlice = createSlice({
     enterCall(state, action) {
       const {
         livekitToken,
+        livekitServerUrl,
         roomId,
         sessionId,
         callPath,
@@ -44,6 +47,7 @@ const videoCallSlice = createSlice({
       state.isInCall = true
       state.isPiP = false
       state.livekitToken = livekitToken
+      state.livekitServerUrl = livekitServerUrl ?? state.livekitServerUrl
       state.callInfo = {
         roomId,
         sessionId,
