@@ -7,7 +7,12 @@ import { MonitorUp } from "lucide-react"
  *
  * @param {{ trackRef: import('@livekit/components-react').TrackReferenceOrPlaceholder, presenterDisplayName: string, isLocal: boolean }} props
  */
-const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal, onClick }) => {
+const ScreenShareTile = ({
+  trackRef,
+  presenterDisplayName,
+  isLocal,
+  onClick,
+}) => {
   const videoRef = useRef(null)
 
   // Attach/detach the screen share track
@@ -29,7 +34,7 @@ const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal, onClick }) =
     : `${presenterDisplayName}'s screen`
 
   return (
-    <div 
+    <div
       onClick={onClick}
       className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-[#C6C6C6] bg-neutral-900 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
     >
@@ -42,7 +47,7 @@ const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal, onClick }) =
       />
 
       {/* Label overlay */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-md bg-black/60 px-3 py-1.5 text-sm font-medium text-white">
+      <div className="absolute bottom-1 left-1 flex items-center gap-2 rounded-md bg-black/60 px-3 py-1.5 text-sm font-medium text-white">
         <MonitorUp size={16} />
         <span>{label}</span>
       </div>

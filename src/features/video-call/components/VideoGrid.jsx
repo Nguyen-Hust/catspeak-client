@@ -15,17 +15,19 @@ const VideoGrid = () => {
 
   const { spotlightItem, handleTileClick } = useSpotlight(
     screenShareTracks,
-    participants
+    participants,
   )
+
+  const hasScreenShare = screenShareTracks && screenShareTracks.length > 0
 
   const gridClass = "min-[426px]:grid-cols-[repeat(auto-fit,minmax(260px,1fr))]"
   const scrollbarClasses =
     "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5"
 
-  if (spotlightItem) {
+  if (spotlightItem && hasScreenShare) {
     // ─── Spotlight layout ───
     return (
-      <div className="flex h-full w-full flex-col gap-4 p-5 overflow-hidden">
+      <div className="flex h-full w-full flex-col gap-2 p-5 overflow-hidden">
         {/* Main: spotlighted tile */}
         <div className="flex-1 min-h-0 min-w-0">
           {spotlightItem.type === "screen" ? (
@@ -38,14 +40,22 @@ const VideoGrid = () => {
                   "Unknown"
                 }
                 isLocal={spotlightItem.trackRef.participant?.isLocal}
-                onClick={() => handleTileClick(spotlightItem)}
+                onClick={
+                  hasScreenShare
+                    ? () => handleTileClick(spotlightItem)
+                    : undefined
+                }
               />
             </div>
           ) : (
             <div className="h-full w-full">
               <VideoTile
                 participant={spotlightItem.participant}
-                onClick={() => handleTileClick(spotlightItem)}
+                onClick={
+                  hasScreenShare
+                    ? () => handleTileClick(spotlightItem)
+                    : undefined
+                }
               />
             </div>
           )}
@@ -54,7 +64,7 @@ const VideoGrid = () => {
         {/* Bottom row: other tiles */}
         <div
           className={`
-            flex gap-4 overflow-x-auto overflow-y-hidden
+            flex gap-2 overflow-x-auto overflow-y-hidden
             h-28 shrink-0
             ${scrollbarClasses}
           `}
@@ -80,7 +90,11 @@ const VideoGrid = () => {
                     "Unknown"
                   }
                   isLocal={trackRef.participant?.isLocal}
-                  onClick={() => handleTileClick({ type: "screen", trackRef })}
+                  onClick={
+                    hasScreenShare
+                      ? () => handleTileClick({ type: "screen", trackRef })
+                      : undefined
+                  }
                 />
               </div>
             )
@@ -99,7 +113,11 @@ const VideoGrid = () => {
               >
                 <VideoTile
                   participant={participant}
-                  onClick={() => handleTileClick({ type: "video", participant })}
+                  onClick={
+                    hasScreenShare
+                      ? () => handleTileClick({ type: "video", participant })
+                      : undefined
+                  }
                 />
               </div>
             )
@@ -136,7 +154,11 @@ const VideoGrid = () => {
               "Unknown"
             }
             isLocal={trackRef.participant?.isLocal}
-            onClick={() => handleTileClick({ type: "screen", trackRef })}
+            onClick={
+              hasScreenShare
+                ? () => handleTileClick({ type: "screen", trackRef })
+                : undefined
+            }
           />
         </div>
       ))}
@@ -147,7 +169,11 @@ const VideoGrid = () => {
         >
           <VideoTile
             participant={participant}
-            onClick={() => handleTileClick({ type: "video", participant })}
+            onClick={
+              hasScreenShare
+                ? () => handleTileClick({ type: "video", participant })
+                : undefined
+            }
           />
         </div>
       ))}

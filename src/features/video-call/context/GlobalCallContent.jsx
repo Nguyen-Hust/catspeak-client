@@ -6,6 +6,7 @@ import {
   useLocalParticipant,
   useChat,
   useConnectionState,
+  RoomAudioRenderer,
 } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
 
@@ -148,7 +149,12 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     handleToggleScreenShare: actions.handleToggleScreenShare,
   }
 
-  return <ContextProvider value={value}>{children}</ContextProvider>
+  return (
+    <ContextProvider value={value}>
+      <RoomAudioRenderer />
+      {children}
+    </ContextProvider>
+  )
 }
 
 export default GlobalCallContent

@@ -66,26 +66,6 @@ const VideoTile = ({ participant, onClick }) => {
     }
   }, [cameraTrack])
 
-  // For remote participants, also attach audio
-  const micPub = participant.getTrackPublication(Track.Source.Microphone)
-  const audioTrack = micPub?.track
-  const audioRef = useRef(null)
-
-  useEffect(() => {
-    const el = audioRef.current
-    if (!el || isLocal) return
-
-    if (audioTrack) {
-      audioTrack.attach(el)
-    }
-
-    return () => {
-      if (audioTrack) {
-        audioTrack.detach(el)
-      }
-    }
-  }, [audioTrack, isLocal])
-
   return (
     <div
       onClick={onClick}
@@ -106,16 +86,6 @@ const VideoTile = ({ participant, onClick }) => {
         }`}
       />
 
-      {/* Hidden audio element for remote audio */}
-      {!isLocal && (
-        <audio
-          ref={audioRef}
-          autoPlay
-          playsInline
-          style={{ display: "none" }}
-        />
-      )}
-
       {/* Avatar fallback when no video */}
       {!isVideoVisible && (
         <div className="flex h-full w-full items-center justify-center">
@@ -128,18 +98,16 @@ const VideoTile = ({ participant, onClick }) => {
         </div>
       )}
 
-      {/* Name */}
-      <div className="absolute bottom-3 left-3 flex max-w-[90%] items-center gap-2">
-        <div className="min-w-0 truncate font-medium text-black text-sm">
+      {/* Status icons and Name */}
+      <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-white backdrop-blur-sm">
+        <div className="flex flex-shrink-0 items-center gap-1">
+          {screenShareOn && <MonitorUp size={16} />}
+          {!micOn && <MicOff size={16} />}
+          {!webcamOn && <VideoOff size={16} />}
+        </div>
+        <div className="min-w-0 truncate font-medium text-sm">
           {displayName} {isLocal && "(You)"}
         </div>
-      </div>
-
-      {/* Mic / cam / screenshare status icons */}
-      <div className="absolute top-3 right-3 flex items-center gap-3 drop-shadow-md">
-        {screenShareOn && <MonitorUp size={20} className="text-yellow-500" />}
-        {!micOn && <MicOff size={20} />}
-        {!webcamOn && <VideoOff size={20} />}
       </div>
     </div>
   )

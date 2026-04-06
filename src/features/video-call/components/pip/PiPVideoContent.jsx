@@ -8,7 +8,6 @@ import Avatar from "@/shared/components/ui/Avatar"
 
 const DominantVideo = ({ participant }) => {
   const videoRef = useRef(null)
-  const audioRef = useRef(null)
   const isSpeaking = useIsSpeaking(participant)
 
   const cameraPub = participant?.getTrackPublication?.(Track.Source.Camera)
@@ -16,8 +15,6 @@ const DominantVideo = ({ participant }) => {
   const webcamOn = participant?.isCameraEnabled
   const isVideoVisible = webcamOn && !!cameraTrack
 
-  const micPub = participant?.getTrackPublication?.(Track.Source.Microphone)
-  const audioTrack = micPub?.track
   const isLocal = participant?.isLocal
   const displayName = participant?.name || participant?.identity || "?"
 
@@ -28,12 +25,7 @@ const DominantVideo = ({ participant }) => {
     return () => cameraTrack.detach(el)
   }, [cameraTrack])
 
-  useEffect(() => {
-    const el = audioRef.current
-    if (!el || isLocal || !audioTrack) return
-    audioTrack.attach(el)
-    return () => audioTrack.detach(el)
-  }, [audioTrack, isLocal])
+
 
   return (
     <>
@@ -50,14 +42,8 @@ const DominantVideo = ({ participant }) => {
           <Avatar size={48} name={displayName} speaking={isSpeaking} />
         </div>
       )}
-      {!isLocal && (
-        <audio
-          ref={audioRef}
-          autoPlay
-          playsInline
-          style={{ display: "none" }}
-        />
-      )}
+
+
       {isSpeaking && <div className="pip-speaking-ring" />}
     </>
   )

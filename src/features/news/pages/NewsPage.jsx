@@ -44,26 +44,29 @@ const NewsPage = () => {
   }
 
   return (
-    <div className="flex w-full justify-center lg:pr-[320px]">
-      <div className="w-full max-w-[680px]">
-        <div className="flex flex-col gap-4">
-          {accumulatedPosts.map((post) => (
-            <NewsCard key={`${post.postId}-${page}`} news={post} />
-          ))}
-        </div>
-
-        {hasMore && (
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={isFetching}
-              className="rounded-full bg-blue-50 px-6 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50"
-            >
-              {isFetching ? "Loading..." : "Load More"}
-            </button>
+    <div className="flex w-full lg:pr-[320px]">
+      <div className="columns-1 sm:columns-2 md:columns-3 xl:columns-4 gap-4">
+        {accumulatedPosts.map((post) => (
+          <div
+            key={`${post.postId}-${page}`}
+            className="break-inside-avoid mb-4 sm:mb-6"
+          >
+            <NewsCard news={post} />
           </div>
-        )}
+        ))}
       </div>
+
+      {hasMore && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={isFetching}
+            className="rounded-full bg-blue-50 px-6 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50"
+          >
+            {isFetching ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

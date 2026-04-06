@@ -3,6 +3,8 @@ import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MainLogo } from "@/shared/assets/icons/logo"
+import { useConnectionState } from "@livekit/components-react"
+import { ConnectionState } from "livekit-client"
 
 import {
   VideoGrid,
@@ -17,6 +19,7 @@ import { useVideoCallContext } from "@/features/video-call/context/VideoCallCont
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTranslatedRoomName } from "@/features/rooms/utils/roomNameUtils"
+import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 
 const VideoCallRoomContent = () => {
   const { t, language } = useLanguage()
@@ -83,7 +86,24 @@ const VideoCallRoomContent = () => {
     enterPiP(homePath)
   }
 
+  // ── LiveKit connection gate ──
+  // The "Connecting…" loading screen from VideoCallProvider is dismissed
+  // as soon as phase flips to "in-call", but LiveKit may still be
+  // negotiating the WebSocket at that point.  Keep showing a loader
+  // until the connection is fully established so that participant
+  // metadata (name, avatar, etc.) is available when VideoGrid renders.
+  const connectionState = useConnectionState()
+  const livekitReady = connectionState === ConnectionState.Connected
+
   if (!user) return <Navigate to="/" state={{ from: location }} replace />
+
+  if (!livekitReady) {
+    return (
+      <VideoCallLoading
+        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
+      />
+    )
+  }
 
   return (
     <div className="flex h-full w-full flex-col bg-primary2 text-textColor font-sans">

@@ -14,10 +14,7 @@ import {
   useJoinVideoSession,
 } from "@/features/rooms"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import {
-  enterCall,
-  setPiP,
-} from "@/store/slices/videoCallSlice"
+import { enterCall, setPiP } from "@/store/slices/videoCallSlice"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import SessionErrorScreen from "../components/SessionErrorScreen"
