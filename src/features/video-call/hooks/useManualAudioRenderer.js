@@ -12,38 +12,21 @@ const P = "[ManualAudio]"
  * in-app WebView browsers (Zalo, Messenger, LINE, etc.) where React-
  * managed `<audio>` elements silently fail after track renegotiation.
  *
- * How it works:
- *  - Listens to TrackSubscribed / TrackUnsubscribed room events
- *  - On subscribe: creates OR REUSES a DOM `<audio>`, attaches the
- *    MediaStream, calls `.play()` with retry logic
- *  - On unsubscribe: detaches the track but KEEPS the `<audio>` element
- *    alive so it can be reused (preserves autoplay privilege in WebViews)
- *  - Keeps a Map<participantIdentity, { el, trackSid }> for reuse/cleanup
- *  - Elements are only fully removed when the participant disconnects
- *
- * WebView quirks addressed:
- *  1. Container uses `position:absolute; opacity:0` instead of `display:none`
- *     because some WebViews won't activate the media pipeline for elements
- *     inside `display:none` containers.
- *  2. An AudioContext unlock is triggered on first user gesture so that
- *     subsequent `.play()` calls are allowed.
- *  3. A global touch/click listener retries all paused `<audio>` elements
- *     on the next user interaction (fallback for very strict autoplay).
- *
- * Safe on all platforms — desktop browsers work identically.
+ * Key techniques for WebView compatibility:
+ *  1. Manually creates MediaStream from a CLONED MediaStreamTrack
+ *     (bypasses track.attach() and forces a fresh pipeline in the WebView)
+ *  2. Container uses position offscreen (not display:none)
+ *  3. AudioContext unlock on user gesture
+ *  4. Gesture-powered retry for paused elements
  */
 export const useManualAudioRenderer = () => {
   const room = useRoomContext()
 
-  // Map of participantIdentity → { el: HTMLAudioElement, trackSid: string }
+  // Map of participantIdentity → { el, trackSid, clonedMST, stream }
   const audioMapRef = useRef(new Map())
-  // Container for audio elements (lives outside React tree)
   const containerRef = useRef(null)
 
   // ── Create / destroy the container ──
-  // Uses position:absolute + opacity:0 instead of display:none.
-  // Some WebView engines (Zalo, Messenger) refuse to play media inside
-  // display:none containers.
   useEffect(() => {
     const container = document.createElement("div")
     container.id = "manual-audio-renderer"
@@ -54,7 +37,7 @@ export const useManualAudioRenderer = () => {
 
     return () => {
       audioMapRef.current.forEach((entry, identity) => {
-        cleanupAudioElement(entry.el, identity)
+        cleanupEntry(entry, identity)
       })
       audioMapRef.current.clear()
       container.remove()
@@ -63,8 +46,6 @@ export const useManualAudioRenderer = () => {
   }, [])
 
   // ── AudioContext unlock + gesture-powered audio resume ──
-  // WebView browsers often keep AudioContext suspended until a user gesture.
-  // We also retry all paused <audio> elements on the first interaction.
   useEffect(() => {
     let unlocked = false
 
@@ -72,7 +53,6 @@ export const useManualAudioRenderer = () => {
       if (unlocked) return
       unlocked = true
 
-      // 1. Resume AudioContext (needed by WebViews)
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext
         if (AudioCtx) {
@@ -84,21 +64,18 @@ export const useManualAudioRenderer = () => {
         }
       } catch {}
 
-      // 2. Retry all paused <audio> elements
+      // Retry all paused <audio> elements
       audioMapRef.current.forEach((entry, identity) => {
         if (entry.el && entry.el.paused && entry.el.srcObject) {
           entry.el
             .play()
             .then(() =>
-              console.log(
-                `${P} ✅ Resumed paused audio for ${identity} via user gesture`,
-              ),
+              console.log(`${P} ✅ Resumed ${identity} via user gesture`),
             )
             .catch(() => {})
         }
       })
 
-      // Clean up listeners after first successful unlock
       cleanup()
     }
 
@@ -122,53 +99,81 @@ export const useManualAudioRenderer = () => {
     const sid = pub.trackSid
     if (!identity || !sid || !containerRef.current) return
 
-    const existing = audioMapRef.current.get(identity)
-
-    if (existing) {
-      // Reuse the existing <audio> element — just swap the track.
-      if (existing.trackSid === sid) {
-        console.log(`${P} 🔄 Re-attaching same track for ${identity} (${sid})`)
-      } else {
-        console.log(
-          `${P} 🔄 Swapping track for ${identity}: ${existing.trackSid} → ${sid}`,
-        )
-      }
-
-      // Detach old track
-      try {
-        existing.el.pause()
-        existing.el.srcObject = null
-      } catch {}
-
-      // Attach the new track's MediaStream
-      track.attach(existing.el)
-      existing.trackSid = sid
-      existing.el.setAttribute("data-track-sid", sid)
-
-      playWithRetry(existing.el, sid, identity)
-    } else {
-      // First time — create a new <audio>
-      const el = document.createElement("audio")
-      el.autoplay = true
-      el.playsInline = true
-      // Some WebViews need these explicitly
-      el.setAttribute("playsinline", "")
-      el.setAttribute("webkit-playsinline", "")
-      el.setAttribute("data-participant", identity)
-      el.setAttribute("data-track-sid", sid)
-
-      track.attach(el)
-
-      containerRef.current.appendChild(el)
-      audioMapRef.current.set(identity, { el, trackSid: sid })
-
-      console.log(`${P} ▶️ Created audio element for ${identity} (${sid})`)
-
-      playWithRetry(el, sid, identity)
+    const mst = track.mediaStreamTrack
+    if (!mst) {
+      console.warn(`${P} ⚠️ No mediaStreamTrack for ${identity} (${sid})`)
+      return
     }
+
+    // Log the raw track state for debugging
+    console.log(`${P} 📋 Track state for ${identity} (${sid}):`, {
+      readyState: mst.readyState,
+      enabled: mst.enabled,
+      muted: mst.muted,
+      id: mst.id,
+      kind: mst.kind,
+    })
+
+    // Clean up any previous entry for this participant
+    const existing = audioMapRef.current.get(identity)
+    if (existing) {
+      console.log(
+        `${P} 🔄 Replacing audio for ${identity}: ${existing.trackSid} → ${sid}`,
+      )
+      cleanupEntry(existing, identity)
+      audioMapRef.current.delete(identity)
+    }
+
+    // ── ALWAYS create a fresh <audio> + clone the MediaStreamTrack ──
+    // In WebViews (Zalo, Messenger), reusing <audio> or using
+    // track.attach() after a participant reconnect results in a "playing"
+    // element that produces no sound. Cloning the MediaStreamTrack forces
+    // the WebView to build a completely fresh media pipeline.
+    const clonedMST = mst.clone()
+    const stream = new MediaStream([clonedMST])
+
+    const el = document.createElement("audio")
+    el.autoplay = true
+    el.playsInline = true
+    el.setAttribute("playsinline", "")
+    el.setAttribute("webkit-playsinline", "")
+    el.setAttribute("data-participant", identity)
+    el.setAttribute("data-track-sid", sid)
+
+    // Set srcObject directly (bypass LiveKit's track.attach)
+    el.srcObject = stream
+
+    containerRef.current.appendChild(el)
+    audioMapRef.current.set(identity, { el, trackSid: sid, clonedMST, stream })
+
+    console.log(`${P} ▶️ Created audio for ${identity} (${sid})`)
+
+    // Log the element state immediately
+    console.log(`${P} 📋 <audio> state:`, {
+      srcObject: el.srcObject ? "present" : "null",
+      streamTracks: stream.getTracks().map((t) => ({
+        readyState: t.readyState,
+        enabled: t.enabled,
+        muted: t.muted,
+      })),
+    })
+
+    // If the original MST ends (participant unpublishes), stop the clone too
+    mst.addEventListener(
+      "ended",
+      () => {
+        console.log(
+          `${P} 🔚 Original MST ended for ${identity} — stopping clone`,
+        )
+        clonedMST.stop()
+      },
+      { once: true },
+    )
+
+    playWithRetry(el, sid, identity)
   }, [])
 
-  // ── Detach track but keep the <audio> element alive ──
+  // ── Remove entry when track unsubscribed ──
   const detachTrack = useCallback((pub, participant) => {
     const identity = participant.identity
     const sid = pub.trackSid
@@ -176,26 +181,22 @@ export const useManualAudioRenderer = () => {
 
     const entry = audioMapRef.current.get(identity)
     if (entry && entry.trackSid === sid) {
-      try {
-        entry.el.pause()
-      } catch {}
-      entry.el.srcObject = null
-      entry.trackSid = null
-      console.log(
-        `${P} 🔇 Detached track for ${identity} (${sid}) — element kept`,
-      )
+      cleanupEntry(entry, identity)
+      audioMapRef.current.delete(identity)
+      console.log(`${P} 🔇 Removed audio for ${identity} (${sid})`)
     }
   }, [])
 
-  // ── Remove element entirely when participant leaves the room ──
+  // ── Remove element when participant disconnects ──
   const removeParticipant = useCallback((participant) => {
     const identity = participant.identity
     if (!identity) return
 
     const entry = audioMapRef.current.get(identity)
     if (entry) {
-      cleanupAudioElement(entry.el, identity)
+      cleanupEntry(entry, identity)
       audioMapRef.current.delete(identity)
+      console.log(`${P} 👋 Participant left, removed audio for ${identity}`)
     }
   }, [])
 
@@ -249,22 +250,61 @@ export const useManualAudioRenderer = () => {
       room.off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
     }
   }, [room, attachTrack, detachTrack, removeParticipant])
+
+  // ── Periodic health check: detect dead tracks and log ──
+  useEffect(() => {
+    const interval = setInterval(() => {
+      audioMapRef.current.forEach((entry, identity) => {
+        const { el, clonedMST, trackSid } = entry
+        if (!el || !trackSid) return
+
+        const tracks = el.srcObject?.getTracks?.() ?? []
+        const hasDead = tracks.some(
+          (t) => t.readyState === "ended" || !t.enabled,
+        )
+
+        if (hasDead || el.paused) {
+          console.warn(`${P} 🩺 Health check problem for ${identity}:`, {
+            elPaused: el.paused,
+            elMuted: el.muted,
+            tracks: tracks.map((t) => ({
+              readyState: t.readyState,
+              enabled: t.enabled,
+              muted: t.muted,
+            })),
+            clonedMST: clonedMST
+              ? {
+                  readyState: clonedMST.readyState,
+                  enabled: clonedMST.enabled,
+                }
+              : null,
+          })
+        }
+      })
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
 }
 
 // ─── Helpers (module-level) ──────────────────────────────────────────────────
 
-function cleanupAudioElement(el, identity) {
+function cleanupEntry(entry, identity) {
   try {
-    el.pause()
-    el.srcObject = null
-    el.remove()
-    console.log(`${P} 🗑️ Removed audio element for ${identity}`)
+    if (entry.clonedMST) {
+      entry.clonedMST.stop()
+    }
+    if (entry.el) {
+      entry.el.pause()
+      entry.el.srcObject = null
+      entry.el.remove()
+    }
+    console.log(`${P} 🗑️ Cleaned up audio for ${identity}`)
   } catch {}
 }
 
 /**
  * Attempt to play an <audio> element with retries.
- * WebViews often need multiple attempts with increasing delays.
  */
 function playWithRetry(el, sid, identity, attempt = 0) {
   const delays = [0, 100, 300, 800, 1500, 3000]
@@ -279,7 +319,6 @@ function playWithRetry(el, sid, identity, attempt = 0) {
   setTimeout(() => {
     if (!el.parentNode) return
 
-    // Ensure the element is in a playable state
     el.muted = false
     el.volume = 1.0
 
@@ -288,6 +327,20 @@ function playWithRetry(el, sid, identity, attempt = 0) {
         console.log(
           `${P} ✅ Playing audio for ${identity} (${sid}) [attempt ${attempt + 1}]`,
         )
+
+        // Log post-play state for debugging
+        const tracks = el.srcObject?.getTracks?.() ?? []
+        console.log(`${P} 📋 Post-play state for ${identity}:`, {
+          paused: el.paused,
+          readyState: el.readyState,
+          volume: el.volume,
+          muted: el.muted,
+          tracks: tracks.map((t) => ({
+            readyState: t.readyState,
+            enabled: t.enabled,
+            muted: t.muted,
+          })),
+        })
       })
       .catch((err) => {
         console.warn(
