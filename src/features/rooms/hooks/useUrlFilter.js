@@ -40,9 +40,17 @@ export const useUrlFilter = (paramName) => {
     [currentValues],
   )
 
+  const clearAll = useCallback(() => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.delete(paramName)
+    newParams.set("page", "1")
+    setSearchParams(newParams, { preventScrollReset: true })
+  }, [searchParams, paramName, setSearchParams])
+
   return {
     currentValues,
     toggleValue,
     isSelected,
+    clearAll,
   }
 }

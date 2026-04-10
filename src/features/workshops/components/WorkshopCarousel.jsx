@@ -8,44 +8,50 @@ import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import ChinaWorkshopModal from "./modals/ChinaWorkshopModal"
 import { getWorkshopSlides } from "../data/workshopSlides"
 import WorkshopCard from "./WorkshopCard"
-import useRoomCarousel from "@/features/rooms/hooks/useRoomCarousel"
-import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
 import colors from "@/shared/utils/colors"
 
-const WorkshopCarousel = ({ slides: propSlides = [] }) => {
+const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
   const { lang } = useParams()
   const { t } = useLanguage()
   const [modalType, setModalType] = useState(null) // 'china' or 'development'
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   // Get slides from data utility
   const slides = getWorkshopSlides(t, lang, propSlides)
 
-  const itemsPerPage = useResponsiveItemsPerPage()
-  const isMobile = itemsPerPage === null
-
-  const { visibleItems, currentPage, goNext, goPrev, canGoNext, canGoPrev } =
-    useRoomCarousel(slides, itemsPerPage ?? 4)
-
   if (slides.length === 0) return null
 
-  const renderHeader = (showNavButtons = false) => {
-    const shouldShowNav = showNavButtons && slides.length > itemsPerPage
+  const canGoPrev = currentIndex > 0
+  const canGoNext = currentIndex < slides.length - 1
 
-    return (
+  const goPrev = () => {
+    if (canGoPrev) setCurrentIndex((i) => i - 1)
+  }
+
+  const goNext = () => {
+    if (canGoNext) setCurrentIndex((i) => i + 1)
+  }
+
+  return (
+    <div className="w-full">
+      {/* Header */}
       <div className="relative z-10 flex w-full items-center justify-between mb-2">
-        <h2
-          className="text-xl font-bold"
-          style={{ color: colors?.headingColor || "#111827" }}
-        >
-          {t?.workshops?.title || "Workshops"}
-        </h2>
+        {!hideTitle && (
+          <h2
+            className="text-xl font-bold"
+            style={{ color: colors?.headingColor || "#111827" }}
+          >
+            {t?.workshops?.title || "Workshops"}
+          </h2>
+        )}
+        {hideTitle && <div />}
 
-        {shouldShowNav && (
+        {slides.length > 1 && (
           <div className="flex items-center gap-2 pr-2">
             <button
               onClick={goPrev}
               disabled={!canGoPrev}
-              aria-label="Previous workshops"
+              aria-label="Previous workshop"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-gray-50 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -53,7 +59,7 @@ const WorkshopCarousel = ({ slides: propSlides = [] }) => {
             <button
               onClick={goNext}
               disabled={!canGoNext}
-              aria-label="Next workshops"
+              aria-label="Next workshop"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-gray-50 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight className="h-5 w-5" />
@@ -61,56 +67,43 @@ const WorkshopCarousel = ({ slides: propSlides = [] }) => {
           </div>
         )}
       </div>
-    )
-  }
 
-  const renderMobileContent = () => (
-    <div className="flex flex-col gap-2">
-      {renderHeader()}
-      <div className="flex gap-4 overflow-x-auto py-8 -my-8 px-2 -mx-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {slides.map((slide, idx) => (
-          <div key={idx} className="min-w-full flex-shrink-0 snap-center flex">
-            <WorkshopCard slide={slide} onCtaClick={setModalType} />
-          </div>
-        ))}
+      {/* Single full-width carousel slide */}
+      <div className="overflow-hidden py-10 -my-10 px-4 -mx-4">
+        <AnimatePresence mode="wait">
+          <FluentAnimation
+            key={currentIndex}
+            animationKey={currentIndex}
+            direction="none"
+            duration={0.15}
+            exit={true}
+            className="w-full"
+          >
+            <WorkshopCard
+              slide={slides[currentIndex]}
+              onCtaClick={setModalType}
+            />
+          </FluentAnimation>
+        </AnimatePresence>
       </div>
-    </div>
-  )
 
-  const renderDesktopContent = () => {
-    const gridCols = itemsPerPage === 2 ? "grid-cols-2" : "grid-cols-3"
-
-    return (
-      <div className="flex flex-col gap-2">
-        {renderHeader(true)}
-
-        <div className="overflow-hidden py-10 -my-10 px-4 -mx-4">
-          <AnimatePresence mode="wait">
-            <FluentAnimation
-              key={currentPage}
-              animationKey={currentPage}
-              direction="none"
-              duration={0.15}
-              exit={true}
-              className={`grid ${gridCols} gap-4 w-full`}
-            >
-              {visibleItems.map((slide, idx) => (
-                <WorkshopCard
-                  key={`${currentPage}-${idx}`}
-                  slide={slide}
-                  onCtaClick={setModalType}
-                />
-              ))}
-            </FluentAnimation>
-          </AnimatePresence>
+      {/* Dot indicators */}
+      {slides.length > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-3">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                idx === currentIndex
+                  ? "w-6 h-2 bg-[#990011]"
+                  : "w-2 h-2 bg-[#C6C6C6] hover:bg-[#999]"
+              }`}
+            />
+          ))}
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="w-full">
-      {isMobile ? renderMobileContent() : renderDesktopContent()}
+      )}
 
       <ChinaWorkshopModal
         open={modalType === "china"}

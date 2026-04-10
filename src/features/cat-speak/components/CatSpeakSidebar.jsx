@@ -38,7 +38,7 @@ const CatSpeakSidebar = () => {
     // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
     // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    { key: "schedules", label: t.catSpeak.sidebar.schedules, icon: Calendar },
+    // { key: "schedules", label: t.catSpeak.sidebar.schedules, icon: Calendar },
   ]
 
   const bottomItems = [
@@ -116,7 +116,7 @@ const CatSpeakSidebar = () => {
   return (
     <>
       {/* Desktop Sidebar Only — mobile nav is handled by the header's MobileDrawer */}
-      <div className="hidden lg:block w-[320px] shrink-0 p-5 sticky top-[80px] h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="hidden lg:block w-[320px] shrink-0 p-5 sticky top-[72px] h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <SidebarContent />
       </div>
 

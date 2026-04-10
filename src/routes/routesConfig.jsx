@@ -21,7 +21,7 @@ import VideoPage from "@/features/video/VideoPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import SchedulesPage from "@/features/calendar/pages/SchedulesPage"
-import HomePage from "@/features/homepage/pages/HomePage"
+
 
 // Shared Pages
 import { ComingSoonPage } from "@/shared/pages"
@@ -83,23 +83,7 @@ const routesConfig = [
     ],
   },
 
-  // Language-prefixed home route
-  {
-    path: "/:lang/home",
-    element: <LanguageLayout />,
-    children: [
-      {
-        element: <MainLayout />,
-        children: [
-          {
-            index: true,
-            element: <HomePage />,
-          },
-          { path: "*", element: <PageNotFound /> },
-        ],
-      },
-    ],
-  },
+
 
   // Language-prefixed community route
   {

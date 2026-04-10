@@ -67,18 +67,30 @@ const PersonalInformationPage = () => {
     }
   }
 
+  const buildProfilePayload = (overrides = {}) => ({
+    nickname: formData.nickname,
+    country: formData.country,
+    address: formData.address,
+    phoneNumber: formData.phoneNumber,
+    email: formData.email,
+    ...overrides,
+  })
+
   const handleSave = async () => {
     try {
-      await updateProfile({
-        nickname: formData.nickname,
-        country: formData.country,
-        address: formData.address,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-      }).unwrap()
+      await updateProfile(buildProfilePayload()).unwrap()
       setEditingField(null)
     } catch (error) {
       console.error("Failed to update profile", error)
+    }
+  }
+
+  const handleCountryChange = async (val) => {
+    setFormData((prev) => ({ ...prev, country: val }))
+    try {
+      await updateProfile(buildProfilePayload({ country: val })).unwrap()
+    } catch (error) {
+      console.error("Failed to update country", error)
     }
   }
 
@@ -95,7 +107,7 @@ const PersonalInformationPage = () => {
         {t.profile?.personalInfo?.title}
       </h1>
 
-      <ProfileHeader avatarImageUrl={formData.avatarImageUrl} t={t} />
+      <ProfileHeader avatarImageUrl={formData.avatarImageUrl} username={formData.username} t={t} />
 
       <BasicInfoSection
         formData={formData}
@@ -105,6 +117,7 @@ const PersonalInformationPage = () => {
         onCancel={handleCancel}
         onSave={handleSave}
         onChange={handleChange}
+        onCountryChange={handleCountryChange}
         t={t}
       />
 

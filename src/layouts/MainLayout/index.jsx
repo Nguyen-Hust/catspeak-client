@@ -11,7 +11,7 @@ import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import MainSidebar from "./MainSidebar"
+
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const [authModal, setAuthModal] = useState({
@@ -69,19 +69,12 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     >
       <div className="flex flex-col min-h-screen bg-white text-left overflow-x-clip">
         {showHeader && (
-          <HeaderBar 
-            onGetStarted={() => openAuthModal("login")} 
-            hideDesktopNav={!isLandingPage} 
-          />
+          <HeaderBar onGetStarted={() => openAuthModal("login")} />
         )}
 
-        <div className="flex flex-row flex-1 bg-white min-w-0 items-stretch">
-          {!isLandingPage && <MainSidebar />}
-
-          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
-            <Outlet />
-          </main>
-        </div>
+        <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
+          <Outlet />
+        </main>
 
         {/* Footer full width (bên trong tự giới hạn 1200px) */}
         {showFooter && isLandingPage && <Footer />}

@@ -8,7 +8,7 @@ import HeaderGuestControls from "./HeaderGuestControls"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth"
 
-const HeaderBar = ({ onGetStarted, hideDesktopNav }) => {
+const HeaderBar = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -35,11 +35,9 @@ const HeaderBar = ({ onGetStarted, hideDesktopNav }) => {
         </div>
 
         {/* Center Section: Desktop Nav */}
-        {!hideDesktopNav && (
-          <div className="hidden lg:block">
-            <DesktopNav />
-          </div>
-        )}
+        <div className="hidden lg:block">
+          <DesktopNav />
+        </div>
 
         {/* Right Section: Controls */}
         <div className="flex-1 flex justify-end">

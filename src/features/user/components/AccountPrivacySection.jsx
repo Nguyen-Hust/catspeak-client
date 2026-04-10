@@ -1,5 +1,6 @@
 import React from "react"
 import EditableField from "./EditableField"
+import ChangePasswordSection from "./ChangePasswordSection"
 
 const AccountPrivacySection = ({
   formData,
@@ -19,17 +20,7 @@ const AccountPrivacySection = ({
 
       <div className="flex flex-col gap-6">
         {/* Password */}
-        <div className="flex items-center justify-between border-b border-gray-100 py-3">
-          <span className="w-32 font-bold text-gray-900">
-            {t.profile?.personalInfo?.password || "Password"}
-          </span>
-          <span className="flex-1 text-gray-600 tracking-widest text-lg">
-            ***********
-          </span>
-          <button className="font-bold text-red-800 hover:text-red-900">
-            {t.profile?.personalInfo?.reset || "Reset"}
-          </button>
-        </div>
+        <ChangePasswordSection t={t} />
 
         {/* Address */}
         <EditableField

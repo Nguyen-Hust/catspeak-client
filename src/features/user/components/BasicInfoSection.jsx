@@ -1,5 +1,6 @@
 import React from "react"
 import EditableField from "./EditableField"
+import CountryDropdown from "./CountryDropdown"
 
 const BasicInfoSection = ({
   formData,
@@ -9,6 +10,7 @@ const BasicInfoSection = ({
   onCancel,
   onSave,
   onChange,
+  onCountryChange,
   t,
 }) => {
   return (
@@ -47,12 +49,10 @@ const BasicInfoSection = ({
           {t.profile?.personalInfo?.country || "Quốc gia"}
         </span>
         <div className="flex-1"></div>
-        <div className="relative">
-          <button className="flex items-center gap-2 rounded border border-gray-200 px-3 py-1 text-sm font-bold text-red-900 hover:bg-gray-50">
-            {formData.country || "Viet Nam"}
-            <span className="text-gray-400">▼</span>
-          </button>
-        </div>
+        <CountryDropdown
+          value={formData.country}
+          onChange={onCountryChange}
+        />
       </div>
 
       {/* Account Type */}

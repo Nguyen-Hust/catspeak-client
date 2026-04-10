@@ -4,13 +4,16 @@ import { useSearchParams, useParams, useNavigate } from "react-router-dom"
 import {
   ClassSidebar,
   CommunicateTab,
-  // RoomsTabs,
   RoomsMobileDrawer,
   useGetRoomsQuery,
   useRoomsPageLogic,
-  AllowConnectSwitch,
+  SessionActionButtons,
+  CreateRoomModal,
 } from "@/features/rooms"
 
+import RoomFilterSidebar from "@/features/rooms/components/navigation/RoomFilterSidebar"
+import WelcomeSection from "@/features/homepage/components/WelcomeSection"
+import { WorkshopCarousel } from "@/features/workshops"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { PageNotFound } from "@/shared/pages"
 import { AnimatePresence } from "framer-motion"
@@ -21,6 +24,7 @@ import {
 
 const RoomsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
   const { t } = useLanguage()
 
   const [page, setPage] = useState(1)
@@ -28,6 +32,9 @@ const RoomsPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { lang } = useParams()
+
+  // Session logic (moved from HomePage)
+  const { state, actions } = useRoomsPageLogic()
 
   // Map language code to language type
   const langMap = {
@@ -55,6 +62,24 @@ const RoomsPage = () => {
     }
   }
 
+  const handleCreateOneOnOne = () => {
+    actions.handleCreateOneOnOneSession(() => {
+      const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+      const preferences = {
+        roomType: "OneToOne",
+        topics: [],
+        languageType: getLanguageName(supportedLangCode),
+      }
+      navigate("/queue", { state: preferences })
+    })
+  }
+
+  const handleCreateStudyGroup = () => {
+    actions.handleCreateStudyGroupSession(() => {
+      setCreateRoomModalOpen(true)
+    })
+  }
+
   const requiredLevels = searchParams.getAll("requiredLevels")
   const requiredLevelsArg =
     requiredLevels.length > 0 ? requiredLevels : undefined
@@ -70,7 +95,6 @@ const RoomsPage = () => {
   const pageSize = 12
 
   // Only fetch data if we are in a specific category (Filtered View)
-  // Otherwise, the CommunicateTab's sections will fetch their own data.
   const shouldFetch = !!categories
 
   const { data: responseData, isLoading } = useGetRoomsQuery(
@@ -97,60 +121,82 @@ const RoomsPage = () => {
         direction="up"
         className="w-full"
       >
-        {/* Hero Section removed and moved to HomePage */}
+        {/* ─── Hero Section: WelcomeSection + WorkshopCarousel ─── */}
+        <div className="p-5 pb-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+            {/* Left: Welcome + Action Buttons */}
+            <div className="flex flex-col gap-8">
+              <WelcomeSection />
+              <SessionActionButtons
+                handleCreateOneOnOneSession={handleCreateOneOnOne}
+                handleCreateStudyGroupSession={handleCreateStudyGroup}
+                isCreatingOneOnOne={state.isCreatingOneOnOne}
+                isCreatingStudyGroup={state.isCreatingStudyGroup}
+              />
+            </div>
 
-        {/* Allow Connect Switch Section (Hidden per user request, keeping component imported for future use) */}
-        {/* <div className="flex px-5 pt-2 pb-2">
-          <AllowConnectSwitch />
-        </div> */}
+            {/* Right: Workshop Carousel */}
+            <div className="w-full">
+              <WorkshopCarousel hideTitle />
+            </div>
+          </div>
+        </div>
 
-        {/* Lower section with content & sidebar */}
+        {/* ─── Rooms Section: Filter Sidebar + CommunicateTab ─── */}
         <div className="p-5">
-          <div className="flex flex-col gap-6 w-full">
+          {/* Mobile Filter Button (inline, above content) */}
+          <div className="lg:hidden mb-4 flex justify-end">
+            <button
+              onClick={() => setFiltersOpen(true)}
+              className="flex items-center gap-2 rounded-lg h-10 px-4 text-sm font-medium border border-[#C6C6C6] bg-white hover:bg-gray-50 transition-colors"
+            >
+              <Filter className="w-4 h-4" />
+              <span>{t.rooms?.filters?.title || "Filters"}</span>
+            </button>
+          </div>
+
+          <RoomsMobileDrawer
+            isOpen={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            title={t.rooms?.filters?.title || "Filters"}
+          >
+            <RoomFilterSidebar inDrawer />
+          </RoomsMobileDrawer>
+
+          <div className="flex gap-6 w-full">
+            {/* Desktop Filter Sidebar */}
+            <div className="hidden lg:block w-[280px] shrink-0">
+              <RoomFilterSidebar />
+            </div>
+
             {/* Content area */}
-            <div className="flex flex-col min-w-0">
-              <div className="w-full">
-                {/* Hiding tabs since there's currently only the communicate tab */}
-                {/* <div className="mb-4">
-                  <RoomsTabs tab={tab} setTab={setTab} />
-                </div> */}
-
-                {/* Sidebar Drawer */}
-                <RoomsMobileDrawer
-                  isOpen={filtersOpen}
-                  onClose={() => setFiltersOpen(false)}
-                  title={
-                    tab === "class"
-                      ? t.rooms?.tabs?.class || "Class List"
-                      : t.rooms?.filters?.title || "Filters"
-                  }
-                >
-                  {tab === "class" ? <ClassSidebar /> : null}
-                </RoomsMobileDrawer>
-
-                {/* Tab Panels */}
-                <div className="overflow-x-clip">
-                  <AnimatePresence mode="wait">
-                    <FadeAnimation key={tab} className="w-full">
-                      {tab === "communicate" && (
-                        <CommunicateTab
-                          rooms={rooms}
-                          selectedCategories={categories}
-                          page={page}
-                          totalPages={totalPages}
-                          setPage={setPage}
-                          languageType={languageType}
-                          requiredLevels={requiredLevelsArg}
-                          topics={topicsArg}
-                        />
-                      )}
-                    </FadeAnimation>
-                  </AnimatePresence>
-                </div>
+            <div className="flex-1 min-w-0">
+              <div>
+                <AnimatePresence mode="wait">
+                  <FadeAnimation key={tab} className="w-full">
+                    {tab === "communicate" && (
+                      <CommunicateTab
+                        rooms={rooms}
+                        selectedCategories={categories}
+                        page={page}
+                        totalPages={totalPages}
+                        setPage={setPage}
+                        languageType={languageType}
+                        requiredLevels={requiredLevelsArg}
+                        topics={topicsArg}
+                      />
+                    )}
+                  </FadeAnimation>
+                </AnimatePresence>
               </div>
             </div>
           </div>
         </div>
+
+        <CreateRoomModal
+          open={isCreateRoomModalOpen}
+          onCancel={() => setCreateRoomModalOpen(false)}
+        />
       </FluentAnimation>
     </AnimatePresence>
   )

@@ -8,6 +8,7 @@ export { default as RoomsTabs } from "./components/navigation/RoomsTabs"
 export { default as RoomsMobileDrawer } from "./components/navigation/RoomsMobileDrawer"
 export { default as SessionActionButtons } from "./components/SessionActionButtons"
 export { default as AllowConnectSwitch } from "./components/AllowConnectSwitch"
+export { default as RoomFilterSidebar } from "./components/navigation/RoomFilterSidebar"
 export {
   WaitingScreen,
   ParticipantsPreview,

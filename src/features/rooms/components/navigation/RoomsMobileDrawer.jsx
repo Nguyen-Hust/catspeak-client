@@ -29,9 +29,7 @@ const RoomsMobileDrawer = ({ isOpen, onClose, title, children }) => {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="h-[calc(100vh-56px)] overflow-y-auto p-4">
-          {children}
-        </div>
+        <div className="h-[calc(100vh-56px)] overflow-y-auto">{children}</div>
       </div>
     </>
   )

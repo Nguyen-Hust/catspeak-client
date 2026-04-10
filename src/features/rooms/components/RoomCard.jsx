@@ -87,7 +87,7 @@ const RoomCard = ({ room }) => {
         }}
         whileHover={{ y: -4 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="relative flex h-[320px] w-full flex-col overflow-hidden rounded-xl bg-white border border-[#E5E5E5] cursor-pointer"
+        className="relative flex h-[320px] w-full flex-col overflow-hidden rounded-xl bg-white border border-[#E5E5E5] cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300"
       >
         {/* Cover Image Section */}
         <div className="relative h-48 w-full overflow-hidden">

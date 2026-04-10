@@ -121,13 +121,10 @@ const ProfileDropdown = () => {
       <div className="border-t border-[#F0F0F0]" />
 
       <div className="flex flex-col gap-1">
-        {/* <button 
-          onClick={handleProfileClick}
-          className={menuItemClass}
-        >
+        <button onClick={handleProfileClick} className={menuItemClass}>
           <User />
           <span className="text-sm">{t.header.profile}</span>
-        </button> */}
+        </button>
 
         {/*
         <button disabled className={menuItemDisabledClass}>

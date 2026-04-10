@@ -72,6 +72,7 @@ export default {
     seeMore: "Xem thêm",
     noRoomsFound: "Không tìm thấy phòng nào cho các danh mục này",
     noRoomsFoundCategory: "Hiện tại chưa có phòng nào ở đây! Hãy khám phá các danh mục khác nhé.",
+    clear: "Xóa",
   },
   tabs: {
     communicate: "Giao tiếp",

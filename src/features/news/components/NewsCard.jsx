@@ -73,7 +73,7 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative overflow-hidden rounded-xl bg-white flex flex-col shadow-sm cursor-pointer hover:shadow-xl transition-all duration-300 border border-[#e5e5e5]"
+      className="group relative overflow-hidden rounded-xl bg-white flex flex-col shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-[#e5e5e5]"
     >
       {/* Thumbnail */}
       <div
@@ -121,77 +121,86 @@ const NewsCard = ({ news }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col gap-3">
-        {/* Title */}
-        <h3 className="text-base sm:text-lg font-bold leading-snug line-clamp-3 transition-colors">
-          {news.title}
-        </h3>
+      <div className="p-3 flex flex-col gap-3">
+        <div className="flex gap-3">
+          {/* Avatar on the left */}
+          <div className="flex-shrink-0 mt-1">
+            <Avatar
+              size={44}
+              src={avatarSrc}
+              alt={news.authorName || "Author"}
+              name={news.authorName}
+              fallback={news.authorName?.charAt(0) || "C"}
+            />
+          </div>
 
-        {/* Author info & Time */}
-        <div className="flex items-center gap-2 mt-1">
-          <Avatar
-            size={24}
-            src={avatarSrc}
-            alt={news.authorName || "Author"}
-            name={news.authorName}
-            fallback={news.authorName?.charAt(0) || "C"}
-          />
-          <span className="text-sm font-medium text-gray-700 truncate">
-            {news.authorName || "Cat Speak Admin"}
-          </span>
+          {/* Right side content */}
+          <div className="flex flex-col flex-1 min-w-0">
+            {/* Title above */}
+            <h3 className="text-base font-bold leading-snug line-clamp-2 transition-colors">
+              {news.title}
+            </h3>
+
+            {/* Author above */}
+            <span className="text-sm font-medium text-[#606060] truncate">
+              {news.authorName || "Cat Speak Admin"}
+            </span>
+
+            {/* Date */}
+            <div className="flex items-center text-sm text-[#606060] mt-0.5">
+              <span>
+                {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Interactions Row */}
-        <div className="mt-2 flex items-center justify-between text-gray-500 text-sm border-t border-[#e5e5e5] pt-3">
-          <span className="text-xs">
-            {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
-          </span>
-
-          <div className="flex items-center gap-3">
+        {/* Below are the rest of the buttons to interact */}
+        <div className="flex items-center justify-between text-gray-500 text-sm border-t border-[#e5e5e5] pt-3">
+          <div className="flex items-center gap-4">
             <button
-              onClick={(e) => handleReact(e, "Like")}
-              className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Like" ? "text-blue-600" : "hover:text-blue-500"}`}
-              title={t.news?.newsDetail?.like || "Like"}
-            >
-              <ThumbsUp
-                size={16}
-                className={
-                  news.currentUserReaction === "Like" ? "fill-blue-600" : ""
-                }
-              />
-            </button>
+            onClick={(e) => handleReact(e, "Like")}
+            className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Like" ? "text-blue-600" : "hover:text-blue-500"}`}
+            title={t.news?.newsDetail?.like || "Like"}
+          >
+            <ThumbsUp
+              size={18}
+              className={
+                news.currentUserReaction === "Like" ? "fill-blue-600" : ""
+              }
+            />
+          </button>
 
-            <button
-              onClick={(e) => handleReact(e, "Love")}
-              className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Love" ? "text-red-500" : "hover:text-red-400"}`}
-              title={t.news?.newsDetail?.love || "Love"}
-            >
-              <Heart
-                size={16}
-                className={
-                  news.currentUserReaction === "Love" ? "fill-red-500" : ""
-                }
-              />
-            </button>
+          <button
+            onClick={(e) => handleReact(e, "Love")}
+            className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Love" ? "text-red-500" : "hover:text-red-400"}`}
+            title={t.news?.newsDetail?.love || "Love"}
+          >
+            <Heart
+              size={18}
+              className={
+                news.currentUserReaction === "Love" ? "fill-red-500" : ""
+              }
+            />
+          </button>
 
-            <button
-              onClick={(e) => handleReact(e, "Haha")}
-              className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Haha" ? "text-yellow-500" : "hover:text-yellow-400"}`}
-              title={t.news?.newsDetail?.haha || "Haha"}
-            >
-              <Smile
-                size={16}
-                className={
-                  news.currentUserReaction === "Haha" ? "fill-yellow-500" : ""
-                }
-              />
-            </button>
+          <button
+            onClick={(e) => handleReact(e, "Haha")}
+            className={`flex items-center hover:scale-110 transition-transform ${news.currentUserReaction === "Haha" ? "text-yellow-500" : "hover:text-yellow-400"}`}
+            title={t.news?.newsDetail?.haha || "Haha"}
+          >
+            <Smile
+              size={18}
+              className={
+                news.currentUserReaction === "Haha" ? "fill-yellow-500" : ""
+              }
+            />
+          </button>
+          </div>
 
-            {news.totalReactions > 0 && (
-              <span className="font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs ml-1">
-                {news.totalReactions}
-              </span>
-            )}
+          <div className="text-sm font-medium text-[#606060]">
+            {news.totalReactions || 0}{" "}
+            {t.news?.newsDetail?.reactions || "reactions"}
           </div>
         </div>
       </div>
