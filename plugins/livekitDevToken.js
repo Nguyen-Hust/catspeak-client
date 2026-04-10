@@ -44,7 +44,18 @@ export default function livekitDevToken() {
         const jwt = await token.toJwt()
 
         res.setHeader("Content-Type", "application/json")
-        res.end(JSON.stringify({ participant_token: jwt }))
+        res.end(
+          JSON.stringify({
+            server_url: "ws://localhost:7880",
+            participant_token: jwt,
+            cathspeak: {
+              account_id: null,
+              room_id: null,
+              session_id: null,
+              room_name: roomName,
+            },
+          }),
+        )
       })
     },
   }

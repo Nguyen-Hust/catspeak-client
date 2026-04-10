@@ -154,11 +154,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     try {
       // 1. Fetch LiveKit token FIRST to validate connectivity
       const tokenRes = await getLivekitToken({
-        meetingId: room.name,
-        name: user.username,
+        roomId: Number(roomId),
+        participantName: user.username,
       }).unwrap()
 
-      const token = tokenRes?.token
+      const token = tokenRes?.participantToken
       const serverUrl = tokenRes?.serverUrl
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")

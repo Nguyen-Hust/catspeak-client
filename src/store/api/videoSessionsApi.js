@@ -49,10 +49,22 @@ export const videoSessionsApi = baseApi.injectEndpoints({
       ],
     }),
     getLivekitToken: builder.mutation({
-      query: ({ meetingId, name }) => ({
-        url: "/livekit/get-meeting-token",
+      query: ({ roomId, sessionId, roomName, participantName }) => ({
+        url: "/livekit/token",
         method: "POST",
-        body: { meetingId, name },
+        body: { roomId, sessionId, roomName, participantName },
+      }),
+      transformResponse: (response) => ({
+        serverUrl: response.server_url,
+        participantToken: response.participant_token,
+        catspeak: response.cathspeak
+          ? {
+              accountId: response.cathspeak.account_id,
+              roomId: response.cathspeak.room_id,
+              sessionId: response.cathspeak.session_id,
+              roomName: response.cathspeak.room_name,
+            }
+          : null,
       }),
     }),
   }),
