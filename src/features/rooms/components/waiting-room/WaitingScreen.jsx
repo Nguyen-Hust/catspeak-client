@@ -6,6 +6,7 @@ import ParticipantsPreview from "./ParticipantsPreview"
 import VideoPreview from "./VideoPreview"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTranslatedRoomName } from "../../utils/roomNameUtils"
+import meetingFallbackImage from "@/shared/assets/images/rooms/meeting.jpeg"
 
 const WaitingScreen = ({
   session,
@@ -31,7 +32,7 @@ const WaitingScreen = ({
     <div
       className="flex h-[100dvh] w-full flex-col bg-cover bg-center bg-no-repeat relative overflow-y-auto"
       style={{
-        backgroundImage: `url(${room?.thumbnailUrl || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"})`,
+        backgroundImage: `url(${room?.thumbnailUrl || meetingFallbackImage})`,
       }}
     >
       {/* Dark blurred overlay so the background isn't distracting */}
