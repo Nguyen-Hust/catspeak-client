@@ -1,5 +1,6 @@
-import React from "react"
+import React, { useState } from "react"
 import { colors } from "@/shared/utils/colors"
+import { Eye, EyeOff } from "lucide-react"
 
 const TextInput = ({
   id,
@@ -17,12 +18,17 @@ const TextInput = ({
   showCount = false,
   ...props
 }) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const isPassword = type === "password"
+  const inputType = isPassword ? (isPasswordVisible ? "text" : "password") : type
+
   const variantClasses =
     variant === "square" ? "rounded-lg px-3" : "rounded-full px-4"
 
   const iconPadding = Icon ? "!pl-10" : ""
+  const passwordPadding = isPassword ? "!pr-10" : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] ${variantClasses} ${iconPadding} ${className}`
+  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -37,7 +43,7 @@ const TextInput = ({
         )}
         <input
           id={id}
-          type={type}
+          type={inputType}
           autoFocus={autoFocus}
           style={{
             "--border-color": colors.border,
@@ -50,6 +56,16 @@ const TextInput = ({
           onChange={onChange}
           {...props}
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A7574] hover:text-[#333] transition-colors"
+            tabIndex={-1}
+          >
+            {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
       </div>
       {showCount && props.maxLength && (
         <span className="self-start px-2 text-xs text-[#7A7574]">
