@@ -59,8 +59,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     esbuild: {
-      // Temporarily disabled to debug production logs
-      // drop: mode === "production" ? ["console", "debugger"] : [],
+      drop: mode === "production" ? ["console", "debugger"] : [],
     },
   }
 })
