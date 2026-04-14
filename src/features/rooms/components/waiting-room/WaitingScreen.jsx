@@ -30,9 +30,9 @@ const WaitingScreen = ({
   return (
     <div
       className="flex h-[100dvh] w-full flex-col bg-cover bg-center bg-no-repeat relative overflow-y-auto"
-      style={{
-        backgroundImage: `url(${room?.thumbnailUrl || meetingFallbackImage})`,
-      }}
+      // style={{
+      //   backgroundImage: `url(${room?.thumbnailUrl || meetingFallbackImage})`,
+      // }}
     >
       {/* Dark blurred overlay so the background isn't distracting */}
       <div className="fixed inset-0 bg-[#111111]/40 backdrop-blur-sm" />
@@ -63,8 +63,7 @@ const WaitingScreen = ({
         <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-2xl w-full max-w-[800px] flex flex-col items-center">
           <div className="mb-4 text-center">
             <h4 className="mb-2 font-semibold text-2xl md:text-3xl">
-              {session?.roomName ||
-                t.rooms.waitingScreen.readyToJoin}
+              {session?.roomName || t.rooms.waitingScreen.readyToJoin}
             </h4>
 
             {/* Level & Topic Tags */}
