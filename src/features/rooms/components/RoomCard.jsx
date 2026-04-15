@@ -92,7 +92,7 @@ const RoomCard = ({ room }) => {
           <img
             src={room.thumbnailUrl || meetingFallbackImage}
             alt="Room Cover"
-            className="h-full w-full object-cover transition-transform duration-500"
+            className="h-full w-full object-contain transition-transform duration-500"
           />
 
           {/* Top Overlay: Tags & Bookmark */}
